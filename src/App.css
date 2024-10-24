@@ -49,16 +49,18 @@
 .browser-window {
   flex: 0 0 67%;
   height: 100%;
+  order: 1; /* Place browser on the right on desktop */
 }
 
 .messaging-window {
   flex: 0 0 33%;
   height: 100%;
+  order: 0; /* Place chat on the left on desktop */
 }
 
 @media (max-width: 768px) {
   .app-container {
-    flex-direction: column;
+    flex-direction: column-reverse;
     padding: 10px;
     height: calc(100vh - 20px);
   }
@@ -67,5 +69,6 @@
   .messaging-window {
     flex: 0 0 50%;
     height: 50%;
+    order: 0; /* Reset order on mobile */
   }
 }

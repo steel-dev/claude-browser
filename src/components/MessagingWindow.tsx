@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Window, TextBox, Button } from "react-windows-xp";
 import { Message } from "../types";
+import SystemPromptModal from "./SystemPromptModal";
 
 const CustomInput: React.FC<{
   value: string;
@@ -28,11 +29,17 @@ const CustomInput: React.FC<{
   />
 );
 
+const handleSystemPromptSave = (newPrompt: string) => {
+  // Here you can implement the logic to update the system prompt
+  console.log("New system prompt:", newPrompt);
+};
+
 const MessagingWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState<number>(0);
+  const [isSystemPromptOpen, setIsSystemPromptOpen] = useState(false);
 
   // Update messages when new SSE data is received
 
@@ -141,7 +148,7 @@ const MessagingWindow: React.FC = () => {
       showHelp
       showMaximize
       showMinimize
-      style={{ height: "100%", display: "flex", flexDirection: "column" }} // Ensure it fills the parent
+      style={{ height: "100%", display: "flex", flexDirection: "column" }} // Ensure it fills and layouts properly
     >
       {/* Menu Bar */}
       <div
@@ -160,7 +167,14 @@ const MessagingWindow: React.FC = () => {
           <a href="#" style={{ textDecoration: "underline", color: "black" }}>
             Restart Session
           </a>
-          <a href="#" style={{ textDecoration: "underline", color: "black" }}>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setIsSystemPromptOpen(true);
+            }}
+            style={{ textDecoration: "underline", color: "black" }}
+          >
             Change System Prompt
           </a>
         </div>
@@ -288,6 +302,11 @@ const MessagingWindow: React.FC = () => {
           {(timer % 60).toString().padStart(2, "0")} / 30:00
         </span>
       </div>
+      <SystemPromptModal
+        isOpen={isSystemPromptOpen}
+        onClose={() => setIsSystemPromptOpen(false)}
+        onSave={handleSystemPromptSave}
+      />
     </Window>
   );
 };

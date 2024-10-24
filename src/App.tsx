@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./App.css"; // Import the CSS file
-import TimeDisplay from "./components/BrowserWindow.tsx";
+import BrowserWindow from "./components/BrowserWindow.tsx";
 import MessagingWindow from "./components/MessagingWindow.tsx";
 import { Wallpaper, Window, Button, TextBox } from "react-windows-xp";
 
@@ -10,7 +10,6 @@ const App: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleSubmit = () => {
-    
     if (inputValue.trim()) {
       setApiKey(inputValue.trim());
       setIsApiKeySubmitted(true);
@@ -76,7 +75,7 @@ const App: React.FC = () => {
                 </div>
                 <div style={{ flex: 1, padding: "10px", textAlign: "right" }}>
                   <a
-                    href="https://steel.dev"
+                    href="https://tally.so/r/mZR6ZB"
                     style={{
                       color: "black",
                       fontWeight: "bold",
@@ -129,7 +128,7 @@ const App: React.FC = () => {
           <MessagingWindow />
         </div>
         <div className="browser-window">
-          <TimeDisplay />
+          <BrowserWindow />
         </div>
         
       </div>
