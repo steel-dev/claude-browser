@@ -16,6 +16,7 @@ export const streamMessage = async (
     },
     body: JSON.stringify({ query: messageContent })
   });
+  
 
   if (!response.body) throw new Error('No response body');
 

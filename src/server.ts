@@ -1,61 +1,60 @@
-import { run } from './browser_agent_service/index';
-import dotenv from 'dotenv';
-import Fastify,{ FastifyReply, FastifyRequest } from 'fastify';
-import cors from '@fastify/cors';
+import { run } from "./browser_agent_service/index";
+import dotenv from "dotenv";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
+import cors from "@fastify/cors";
+import { FastifySSEPlugin } from "fastify-sse-v2";
 
 dotenv.config();
 
 const fastify = Fastify({
-    logger: true
-  })
+  logger: true,
+});
 
 // Define request interface
 interface ChatRequest {
   Body: {
     query: string;
-  }
+  };
 }
 
+fastify.register(FastifySSEPlugin);
 fastify.register(cors, {
-    origin: ['http://127.0.0.1:3000', 'http://localhost:3000'],
-    methods: ['GET', 'POST'],
-  });
-
+  origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+  methods: ["GET", "POST"],
+});
 
 // Define route
-fastify.post('/api/chat', {
+fastify.post("/api/chat", {
   schema: {
     body: {
-      type: 'object',
-      required: ['query'],
+      type: "object",
+      required: ["query"],
       properties: {
-        query: { type: 'string' }
-      }
-    }
+        query: { type: "string" },
+      },
+    },
   },
-  handler: async (request: FastifyRequest<ChatRequest>, reply: FastifyReply) => {
+  handler: async (
+    request: FastifyRequest<ChatRequest>,
+    reply: FastifyReply
+  ) => {
     const { query } = request.body;
     // Set headers for Server-Sent Events
-    reply.raw.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      });
-  
-      // Create a callback function to handle streaming outputs
-      const onAgentOutput = (data: string) => {
-        reply.raw.write(`data: ${JSON.stringify({ message: data })}\n\n`);
-      };
-    
-      try {
-        await run({ query }, onAgentOutput);
-      } catch (error) {
-        console.error('Error in AI agent:', error);
-        reply.raw.write(`data: ${JSON.stringify({ error: 'An error occurred' })}\n\n`);
-      } finally {
-        reply.raw.end();
-      }
-  }
+
+    // Create a callback function to handle streaming outputs
+    const onAgentOutput = (data: string) => {
+      reply.sse({ data });
+    };
+
+    try {
+      await run({ query }, onAgentOutput);
+    } catch (error) {
+      console.error("Error in AI agent:", error);
+      reply.sse({ data: "An error occurred" });
+    } finally {
+      reply.sseContext.source.end();
+    }
+  },
 });
 
 // Start the server

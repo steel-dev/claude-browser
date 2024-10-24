@@ -18,7 +18,7 @@ async function releaseSession(sessionId: string) {
   }
 
   try {
-    const response = await fetch(`https://api.steel.dev/v1/sessions/${sessionId}/release`, {
+    const response = await fetch(`https://steel-api-staging.fly.dev/v1/sessions/${sessionId}/release`, {
       method: 'POST',
       headers: {
         'Steel-Api-Key': steelApiKey
@@ -90,6 +90,7 @@ export async function run(
         if (onAgentOutput) {
           onAgentOutput(data);
         } else {
+          console.log("No onAgentOutput callback provided");
           console.log(data);
         }
       };
@@ -112,15 +113,15 @@ export async function run(
     });
 
     // Open the browser
-    const openBrowser = () => {
-      exec(`open ${session.sessionViewerUrl}`, (error) => {
-        if (error) {
-          console.error('Error opening browser:', error);
-        }
-      });
-    };
+    // const openBrowser = () => {
+    //   exec(`open ${session.sessionViewerUrl}`, (error) => {
+    //     if (error) {
+    //       console.error('Error opening browser:', error);
+    //     }
+    //   });
+    // };
 
-    openBrowser();
+    // openBrowser();
 
     const browser = await puppeteer.connect({
       browserWSEndpoint:
@@ -138,14 +139,12 @@ export async function run(
     // Initial user message
     messages.push(
       {
-        // @ts-ignore
         role: 'user',
         content: [{
           type: 'text',
           text: `You have been tasked with answering the following question: ${query}`,
         }],
     });
-    //output("anthropicTools", JSON.stringify(anthropicTools, null, 2));
 
     while (true) {
       const filteredMessages = filterToNMostRecentImages(
@@ -153,6 +152,15 @@ export async function run(
         image_truncation_threshold,  // Keep 10 most recent images
         image_truncation_threshold  // Minimum removal threshold
       );
+
+      // Prepare variables to collect streamed events
+      let assistantMessage: any = {
+        role: 'assistant',
+        content: [],
+      };
+      let currentContentBlock: any = null;
+      let currentContentIndex: number = -1;
+
       // Call the API
       console.log("MAKING MODEL CALL", JSON.stringify(messages, null, 2));
       const response = await anthropic.beta.messages.create({
@@ -161,79 +169,109 @@ export async function run(
         messages: filteredMessages,
         system: systemPrompt,
         tools: anthropicTools,
-        stream: false,
+        stream: true,
         betas: ["computer-use-2024-10-22"],
       });
-      
 
-      console.log('Response:', JSON.stringify(response, null, 2));
-
-      // Append assistant's response to messages
-      if (response.content && response.content.length > 0) {
-        messages = [...messages, {
-          role: 'assistant',
-          content: response.content,
-        }];
-        console.log(messages);
-        // Check for function calls
-        const functionCalls = response.content.filter(
-          (block) => block.type === 'tool_use' && block.name
-        );
-
-        if (functionCalls.length > 0) {
-          for (const functionCall of functionCalls) {
-            const { name, input: functionArguments } = functionCall as any;
-            const tool = tools.find((tool) => tool.name === name);
-            
-            if (tool) {
-              // TODO: This logic will no work when not using the computer tool
-              const { newPage, screenshot } = await tool.handler({
-                page,
-                ...functionArguments,
-              });
-              console.log(page.url());
-              // const cleanedContent = cleanHtml(content);
-              page = newPage;
-
-              // Create tool result
-              const toolResult = {
-                type: 'tool_result',
-                tool_use_id: (functionCall as any).id,
-                content: [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/png",
-                      "data": screenshot,
-                    },
-                  },
-                ],
-              };
-
-              // Append tool result to messages
-              messages.push({
-                role: 'user',
-                content: [toolResult],
-              });
-            } else {
-              console.error(`No tool found for function ${name}`);
+      // Process the streamed events
+      for await (const event of response) {
+        if (event.type === 'message_stop') {
+          // Stream has ended, break the loop
+          break;
+        } else if (event.type === 'content_block_start') {
+          // Start a new content block
+          currentContentBlock = { ...event.content_block };
+          currentContentIndex = event.index;
+          // Initialize content based on type
+          if (currentContentBlock.type === 'text') {
+            currentContentBlock.text = '';
+          } else if (currentContentBlock.type === 'tool_use') {
+            currentContentBlock.input = '';
+          }
+        } else if (event.type === 'content_block_delta') {
+          if (currentContentBlock && event.index === currentContentIndex) {
+            const delta = event.delta;
+            if (delta.type === 'text_delta') {
+              // Append text delta to current content block
+              currentContentBlock.text += delta.text;
+              // Optionally output the delta text
+              output(delta.text);
+            } else if (delta.type === 'input_json_delta') {
+              // Append partial JSON to input
+              currentContentBlock.input += delta.partial_json;
             }
           }
-        } else {
-          // No function calls, output the assistant's response
-          response.content.forEach((block) => {
-            if (block.type === 'text') {
-              output(block.text);
-            }
-          });
-          await releaseSession(session.id);
-          break; // Exit the loop
+        } else if (event.type === 'content_block_stop') {
+          // Content block is complete, add it to assistant message content
+          if (currentContentBlock.input && currentContentBlock.input.endsWith("}")) {
+            console.log("PARSING JSON", currentContentBlock.input);
+            currentContentBlock.input = JSON.parse(currentContentBlock.input);
+          }
+          assistantMessage.content.push(currentContentBlock);
+          currentContentBlock = null;
+          currentContentIndex = -1;
+        }
+        // Handle other event types if necessary
+      }
+
+      // At this point, we've received the full assistant message
+      console.log('Assistant Message:', JSON.stringify(assistantMessage, null, 2));
+
+      // Append assistant's response to messages
+      messages.push(assistantMessage);
+
+      // Check for tool uses in the assistant's response
+      const functionCalls = assistantMessage.content.filter(
+        (block: any) => block.type === 'tool_use' && block.name
+      );
+
+      if (functionCalls.length > 0) {
+        for (const functionCall of functionCalls) {
+          const { name, input: functionArguments } = functionCall;
+          const tool = tools.find((tool) => tool.name === name);
+
+          if (tool) {
+            // Execute the tool's handler
+            const { newPage, screenshot } = await tool.handler({
+              page,
+              ...functionArguments,
+            });
+            console.log(page.url());
+            page = newPage;
+
+            // Create tool result
+            const toolResult = {
+              type: 'tool_result',
+              tool_use_id: functionCall.id,
+              content: [
+                {
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: "image/png",
+                    data: screenshot,
+                  },
+                },
+              ],
+            };
+
+            // Append tool result to messages
+            messages.push({
+              role: 'user',
+              content: [toolResult],
+            });
+          } else {
+            console.error(`No tool found for function ${name}`);
+          }
         }
       } else {
-        console.error('No content in response');
-        await releaseSession(session.id);
-        break;
+        // No function calls, assistant provided a final answer
+        assistantMessage.content.forEach((block: any) => {
+          if (block.type === 'text') {
+            //output(block.text);
+          }
+        });
+        break; // Exit the loop
       }
     }
 
