@@ -97,6 +97,48 @@ export async function claudeComputerTool({
         KP_8: "Numpad8",
         KP_9: "Numpad9",
         // Add more mappings as needed
+        Page_Down: "PageDown",
+        Page_Up: "PageUp",
+
+        // additional keys
+        // Additional mappings
+        // Function keys
+        F1: "F1", F2: "F2", F3: "F3", F4: "F4",
+        F5: "F5", F6: "F6", F7: "F7", F8: "F8",
+        F9: "F9", F10: "F10", F11: "F11", F12: "F12",
+        
+        // Navigation
+        Home: "Home",
+        End: "End",
+        Insert: "Insert",
+        Delete: "Delete",
+        
+        // Modifiers with directional variants
+        Shift_L: "ShiftLeft",
+        Shift_R: "ShiftRight",
+        Control_L: "ControlLeft",
+        Control_R: "ControlRight",
+        Alt_L: "AltLeft",
+        Alt_R: "AltRight",
+        
+        // Media keys
+        AudioVolumeMute: "AudioVolumeMute",
+        AudioVolumeDown: "AudioVolumeDown",
+        AudioVolumeUp: "AudioVolumeUp",
+        
+        // Additional special keys
+        Print: "PrintScreen",
+        Scroll_Lock: "ScrollLock",
+        Pause: "Pause",
+        Menu: "ContextMenu",
+        
+        // Numpad
+        KP_Enter: "NumpadEnter",
+        KP_Multiply: "NumpadMultiply",
+        KP_Add: "NumpadAdd",
+        KP_Subtract: "NumpadSubtract",
+        KP_Decimal: "NumpadDecimal",
+        KP_Divide: "NumpadDivide",
     };
     return keyMap[key] || key;
   }
@@ -154,7 +196,7 @@ export async function claudeComputerTool({
             await page.keyboard.down(key);
             pressedModifiers.push(key);
           } else {
-            // Non-modifier keys
+            // Non-modifier keys (including PageUp/PageDown)
             await page.keyboard.down(key);
           }
         }
@@ -194,7 +236,7 @@ export async function claudeComputerTool({
 
       if (action === "screenshot") {
         // Take a screenshot
-        const randomId = uuidv4();
+        
         const screenshotBuffer = await page.screenshot({ encoding: 'base64' });
         return { newPage: page, screenshot: screenshotBuffer };
       } else if (action === "cursor_position") {
