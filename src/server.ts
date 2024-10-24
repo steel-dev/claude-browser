@@ -1,13 +1,13 @@
-import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import fastifyCors from '@fastify/cors';
 import { run } from './browser_agent_service/index';
 import dotenv from 'dotenv';
+import Fastify,{ FastifyReply, FastifyRequest } from 'fastify';
+import cors from '@fastify/cors';
 
 dotenv.config();
 
-const fastify: FastifyInstance = Fastify({
-  logger: true
-});
+const fastify = Fastify({
+    logger: true
+  })
 
 // Define request interface
 interface ChatRequest {
@@ -16,10 +16,11 @@ interface ChatRequest {
   }
 }
 
-// Enable CORS
-fastify.register(fastifyCors, { 
-  origin: '*'
-});
+fastify.register(cors, {
+    origin: ['http://127.0.0.1:3000', 'http://localhost:3000'],
+    methods: ['GET', 'POST'],
+  });
+
 
 // Define route
 fastify.post('/api/chat', {
