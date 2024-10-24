@@ -12,7 +12,7 @@ const BrowserWindow: React.FC = () => {
       showMaximize
       showMinimize
       showHelp
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%" }} // Ensure it fills the parent
     >
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         {/* Menu Bar */}

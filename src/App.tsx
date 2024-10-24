@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./App.css"; // Import the CSS file
 import TimeDisplay from "./components/BrowserWindow.tsx";
 import MessagingWindow from "./components/MessagingWindow.tsx";
 import { Wallpaper, Window, Button, TextBox } from "react-windows-xp";
@@ -9,6 +10,7 @@ const App: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleSubmit = () => {
+    
     if (inputValue.trim()) {
       setApiKey(inputValue.trim());
       setIsApiKeySubmitted(true);
@@ -122,20 +124,14 @@ const App: React.FC = () => {
   // Render the main application once API key is submitted
   return (
     <Wallpaper fullScreen>
-      <div
-        style={{
-          display: "flex",
-          padding: "20px",
-          height: "calc(100vh - 40px)",
-          gap: "20px",
-        }}
-      >
-        <div style={{ flex: "0 0 33%" }}>
+      <div className="app-container">
+      <div className="messaging-window">
           <MessagingWindow />
         </div>
-        <div style={{ flex: "0 0 67%" }}>
+        <div className="browser-window">
           <TimeDisplay />
         </div>
+        
       </div>
     </Wallpaper>
   );

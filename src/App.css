@@ -37,3 +37,35 @@
     transform: rotate(360deg);
   }
 }
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+  height: calc(100vh - 40px);
+  gap: 20px;
+}
+
+.browser-window {
+  flex: 0 0 67%;
+  height: 100%;
+}
+
+.messaging-window {
+  flex: 0 0 33%;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+    padding: 10px;
+    height: calc(100vh - 20px);
+  }
+
+  .browser-window,
+  .messaging-window {
+    flex: 0 0 50%;
+    height: 50%;
+  }
+}
