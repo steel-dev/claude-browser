@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Window, TextBox, Button } from "react-windows-xp";
+import React, { useEffect, useState, useRef } from "react";
+import { Window, Button } from "react-windows-xp";
 import { Message } from "../types";
 import SystemPromptModal from "./SystemPromptModal";
 
@@ -40,6 +40,14 @@ const MessagingWindow: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState<number>(0);
   const [isSystemPromptOpen, setIsSystemPromptOpen] = useState(false);
+
+  // Reference to the messages end for scrolling
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   // Update messages when new SSE data is received
 
@@ -99,7 +107,7 @@ const MessagingWindow: React.FC = () => {
                   ...lastMessage,
                   text:
                     lastMessage.text.trimEnd() +
-                    value.replace("data:", "").replace("\n", ""),
+                    value.replace("data:", ""),
                 },
               ];
             }
@@ -190,6 +198,7 @@ const MessagingWindow: React.FC = () => {
           padding: "4px",
           overflow: "hidden", // Ensure content doesn't overflow
           height: "calc(100% - 60px)",
+          
         }}
       >
         {/* Recipient Info */}
@@ -226,6 +235,7 @@ const MessagingWindow: React.FC = () => {
                   textAlign: msg.role === "user" ? "right" : "left",
                   opacity: msg.isStreaming ? 0.7 : 1,
                   width: "100%",
+                  whiteSpace: "pre-wrap",
                 }}
               >
                 <div style={{ marginBottom: "4px" }}>
@@ -241,8 +251,8 @@ const MessagingWindow: React.FC = () => {
                     display: "inline-block",
                     maxWidth: "100%",
                     textAlign: "left",
-                    whiteSpace: "pre-wrap",
-                    userSelect: "text", // Make text selectable
+                    whiteSpace: "pre-wrap", // Add this line
+                    userSelect: "text",
                   }}
                 >
                   {msg.text}
@@ -250,6 +260,7 @@ const MessagingWindow: React.FC = () => {
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <div
             style={{

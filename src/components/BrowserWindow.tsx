@@ -1,6 +1,6 @@
 import React from "react";
 import useTime from "../hooks/useTime";
-import { Window, TextBox, Button } from "react-windows-xp";
+import { Window, TextBox } from "react-windows-xp";
 
 const BrowserWindow: React.FC = () => {
   const { time, error } = useTime();

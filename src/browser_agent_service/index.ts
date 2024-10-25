@@ -1,9 +1,7 @@
 import puppeteer from "puppeteer";
 import { anthropicTools, tools } from "./utils/browser_tools";
 import dotenv from 'dotenv';
-import path from 'path';
 import Steel from 'steel-sdk';
-import { exec } from "child_process";
 import Anthropic from '@anthropic-ai/sdk';
 
 // Load the shared .env file
