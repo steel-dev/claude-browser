@@ -127,9 +127,12 @@ export async function run(
     const browser = await puppeteer.connect({
       browserWSEndpoint: `ws://steel-api-staging.fly.dev?apiKey=${env.STEEL_API_KEY}&sessionId=${input.id}`,
     });
+    
     let pages = await browser.pages();
     let page = pages[0];
     await page.setViewport({ width: 1280, height: 800 });
+    // IMPORTANT!! THIS ADDS THE CLIPBOARD PERMISSIONS TO THE BROWSER
+    
     // console.log("Launched browser");
 
     let messages: any[] = [];
