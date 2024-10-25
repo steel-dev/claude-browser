@@ -32,13 +32,15 @@ const CustomInput: React.FC<{
 );
 
 const MessagingWindow: React.FC = () => {
-  const [messages, setMessages] = useState<ExtendedMessage[]>(() => [{
-    id: Date.now(),
-    text: "Welcome to Claude! I'm here to help you with any questions or tasks you have.",
-    timestamp: new Date(),
-    role: 'system',
-    contentType: 'system',
-  }]);
+  const [messages, setMessages] = useState<ExtendedMessage[]>(() => [
+    {
+      id: Date.now(),
+      text: "Welcome to Claude! I'm here to help you with any questions or tasks you have.",
+      timestamp: new Date(),
+      role: "system",
+      contentType: "system",
+    },
+  ]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState<number>(0);
@@ -107,16 +109,18 @@ const MessagingWindow: React.FC = () => {
         // Set loading state to false after the entire response is processed
         setIsLoading(false);
         console.log("===== Loading state set to false =====");
-
       } catch (error) {
         console.error("Error sending message:", error);
-        setMessages(prev => [...prev, {
-          id: Date.now(),
-          text: "An error occurred while processing your request. Please try again.",
-          timestamp: new Date(),
-          role: 'error',
-          contentType: 'error',
-        }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            text: "An error occurred while processing your request. Please try again.",
+            timestamp: new Date(),
+            role: "error",
+            contentType: "error",
+          },
+        ]);
         setIsLoading(false);
       }
     }
@@ -276,15 +280,7 @@ const MessagingWindow: React.FC = () => {
       showHelp
       showMaximize
       showMinimize
-<<<<<<< Updated upstream
       style={{ height: "100%", display: "flex", flexDirection: "column" }}
-=======
-      style={{
-        height: "calc(100% - 4px)",
-        display: "flex",
-        flexDirection: "column",
-      }} // Ensure it fills and layouts properly
->>>>>>> Stashed changes
     >
       {/* Menu Bar */}
       <div

@@ -129,11 +129,7 @@ export async function run(
     });
     let pages = await browser.pages();
     let page = pages[0];
-<<<<<<< Updated upstream
-    await page.setViewport({ width: 1290, height: 800 });
-=======
     await page.setViewport({ width: 1280, height: 800 });
->>>>>>> Stashed changes
     // console.log("Launched browser");
 
     let messages: any[] = [];
@@ -182,7 +178,7 @@ export async function run(
       for await (const event of response) {
         output(event); // Send the entire event to the client
 
-        if (event.type === 'message_stop') {
+        if (event.type === "message_stop") {
           // Stream has ended, break the loop
           break;
         } else if (event.type === "content_block_start") {
