@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Window, Button } from "react-windows-xp";
+import { Window, Button, Slider, TextBox } from "react-windows-xp";
 
 interface SystemPromptModalProps {
   isOpen: boolean;
@@ -39,10 +39,10 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({
       }}
     >
       <Window
-        title="System Prompt"
+        title="Agent Settings"
         showClose
         onClose={onClose}
-        style={{ width: "500px", height: "auto" }}
+        style={{ width: "500px", height: "auto", display: "flex", flexDirection: "column" }}
       >
         <div style={{ padding: "16px" }}>
           <p style={{ marginBottom: "8px" }}>Edit the system prompt below:</p>
@@ -59,6 +59,29 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({
               fontFamily: "inherit",
             }}
           />
+          <div style={{ width: "50%", marginRight: "auto", marginTop: "16px" }}>
+            <TextBox
+              id="text-1"
+              label="Temperature"
+              onChange={function noRefCheck() {}}
+              placeholder="0.7"
+              stacked
+            />
+            <TextBox
+              id="text-1"
+              label="Num images to keep"
+              onChange={function noRefCheck() {}}
+              placeholder="10"
+              stacked
+            />
+            <TextBox
+              id="text-1"
+              label="New Claude API Key"
+              onChange={function noRefCheck() {}}
+              placeholder="sk-ant-api03-..."
+              stacked
+            />
+          </div>
           <div
             style={{
               display: "flex",
@@ -68,7 +91,7 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({
             }}
           >
             <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+            <Button onClick={handleSave}>Save Changes and Restart Session</Button>
           </div>
         </div>
       </Window>
