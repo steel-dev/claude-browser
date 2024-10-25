@@ -107,11 +107,7 @@ export async function run(
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    // Start new session
-    // const session = await steel.sessions.create({
-    //   sessionTimeout: 90000,
-    //   solveCaptcha: true,
-    // });
+
 
     // Open the browser
     // const openBrowser = () => {
@@ -131,9 +127,6 @@ export async function run(
     let pages = await browser.pages();
     let page = pages[0];
     await page.setViewport({ width: 1280, height: 800 });
-    // IMPORTANT!! THIS ADDS THE CLIPBOARD PERMISSIONS TO THE BROWSER
-    
-    // console.log("Launched browser");
 
     let messages: any[] = [];
 
@@ -244,28 +237,37 @@ export async function run(
 
           if (tool) {
             // Execute the tool's handler
-            const { newPage, screenshot } = await tool.handler({
+            const result = await tool.handler({
               page,
               ...functionArguments,
             });
             console.log(page.url());
-            page = newPage;
+            page = result.newPage;
 
             // Create tool result
-            const toolResult = {
+            const toolResult: any = {
               type: "tool_result",
               tool_use_id: functionCall.id,
-              content: [
-                {
-                  type: "image",
-                  source: {
-                    type: "base64",
-                    media_type: "image/png",
-                    data: screenshot,
-                  },
-                },
-              ],
+              content: [],
             };
+
+            if (result.screenshot) {
+              toolResult.content.push({
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: "image/png",
+                  data: result.screenshot,
+                },
+              });
+            }
+
+            if (result.content) {
+              toolResult.content.push({
+                type: "text",
+                text: result.content,
+              });
+            }
 
             // Append tool result to messages
             messages.push({
@@ -280,7 +282,8 @@ export async function run(
         // No function calls, assistant provided a final answer
         assistantMessage.content.forEach((block: any) => {
           if (block.type === "text") {
-            //output(block.text);
+            // Optionally output the final text
+            // output(block.text);
           }
         });
         break; // Exit the loop

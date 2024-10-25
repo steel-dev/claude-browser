@@ -21,20 +21,7 @@ export async function goToUrl({
 }): Promise<{ newPage: Page; screenshot?: string }> {
   console.log(`Navigating to ${url}`);
   await page.goto(url, { waitUntil: "domcontentloaded" });
-  const screenshotBuffer = await page.screenshot({ encoding: 'base64' });
-  // Save the screenshot to a file
-  const fs = require('fs').promises;
-  const path = require('path');
-  
-  const screenshotDir = path.join(__dirname, '..', '..', '..', 'screenshots');
-  await fs.mkdir(screenshotDir, { recursive: true });
-  
-  const timestamp = new Date().toISOString().replace(/:/g, '-');
-  const filename = `screenshot_${timestamp}.png`;
-  const filepath = path.join(screenshotDir, filename);
-  
-  await fs.writeFile(filepath, screenshotBuffer, 'base64');
-  console.log(`Screenshot saved to ${filepath}`);
+  const screenshotBuffer = await page.screenshot({ encoding: "base64" });
   
   return { newPage: page, screenshot: screenshotBuffer };
 }
@@ -45,9 +32,10 @@ export const saveToMemory = async ({
 }: {
   page: Page;
   information: string;
-}) => {
+}): Promise<{ newPage: Page; content: string }> => {
   console.log(`Saving ${information} to memory`);
-  return { newPage: page, content: "" };
+  // Implement your memory saving logic here
+  return { newPage: page, content: "successfully saved to memory" };
 };
 
 export async function claudeComputerTool({
