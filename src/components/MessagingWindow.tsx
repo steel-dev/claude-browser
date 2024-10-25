@@ -42,7 +42,8 @@ const MessagingWindow: React.FC = () => {
     },
   ]);
   const [newMessage, setNewMessage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
+  // const { setIsSessionLoading, startSession } = useSession();
+  const [isLoading, setIsLoading] = useState(false); // This is for message loading
   const [timer, setTimer] = useState<number>(0);
   const [isSystemPromptOpen, setIsSystemPromptOpen] = useState(false);
 

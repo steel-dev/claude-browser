@@ -3,9 +3,11 @@ import BrowserWindow from "./components/BrowserWindow.tsx";
 import MessagingWindow from "./components/MessagingWindow.tsx";
 import { Wallpaper, Window, Button, TextBox } from "react-windows-xp";
 import { useSession } from "./SessionContext/session.context";
+import LoadingModal from "./components/LoadingModal";
 
 const App: React.FC = () => {
-  const { currentSession, startSession, setClaudeAPIKey } = useSession();
+  const { currentSession, startSession, setClaudeAPIKey, isSessionLoading } =
+    useSession();
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleSubmit = async () => {
@@ -21,6 +23,7 @@ const App: React.FC = () => {
     // Render the popup window
     return (
       <Wallpaper fullScreen>
+        <LoadingModal isOpen={isSessionLoading} />
         <div
           style={{
             display: "flex",
