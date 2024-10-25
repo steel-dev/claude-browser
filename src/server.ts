@@ -95,17 +95,20 @@ fastify.post("/api/chat", {
   ) => {
     const { query, id } = request.body;
     // Set headers for Server-Sent Events
+    reply.raw.setHeader('Content-Type', 'text/event-stream');
+    reply.raw.setHeader('Cache-Control', 'no-cache');
+    reply.raw.setHeader('Connection', 'keep-alive');
 
     // Create a callback function to handle streaming outputs
-    const onAgentOutput = (data: string) => {
-      reply.sse({ data });
+    const onAgentOutput = (event: any) => {
+      reply.sse({ event: event.type, data: JSON.stringify(event) });
     };
 
     try {
       await run({ query, id }, onAgentOutput);
     } catch (error) {
-      fastify.log.error("Error in AI agent:", error);
-      reply.sse({ data: "An error occurred" });
+      console.error("Error in AI agent:", error);
+      reply.sse({ event: 'error', data: 'An error occurred' });
     } finally {
       reply.sseContext.source.end();
     }

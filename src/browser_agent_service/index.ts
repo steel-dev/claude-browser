@@ -88,10 +88,10 @@ function filterToNMostRecentImages(
 
 export async function run(
   input: { query: string; id: string },
-  onAgentOutput?: (data: string) => void
+  onAgentOutput?: (data: any) => void
 ) {
   try {
-    const output = (data: string) => {
+    const output = (data: any) => {
       if (onAgentOutput) {
         onAgentOutput(data);
       } else {
@@ -129,7 +129,7 @@ export async function run(
     });
     let pages = await browser.pages();
     let page = pages[0];
-    await page.setViewport({ width: 1366, height: 768 });
+    await page.setViewport({ width: 1290, height: 800 });
     // console.log("Launched browser");
 
     let messages: any[] = [];
@@ -176,7 +176,9 @@ export async function run(
 
       // Process the streamed events
       for await (const event of response) {
-        if (event.type === "message_stop") {
+        output(event); // Send the entire event to the client
+
+        if (event.type === 'message_stop') {
           // Stream has ended, break the loop
           break;
         } else if (event.type === "content_block_start") {
