@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Window, Button } from "react-windows-xp";
 import { Message } from "../types";
+import { useSession } from "../SessionContext/session.context";
 import SystemPromptModal from "./SystemPromptModal";
 
 const CustomInput: React.FC<{
@@ -49,6 +50,8 @@ const MessagingWindow: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const { currentSession } = useSession();
+
   // Update messages when new SSE data is received
 
   const handleSend = async (): Promise<void> => {
@@ -84,7 +87,7 @@ const MessagingWindow: React.FC = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query: apiMessage }),
+          body: JSON.stringify({ query: apiMessage, id: currentSession?.id }),
         });
 
         const reader = response
@@ -105,15 +108,12 @@ const MessagingWindow: React.FC = () => {
                 ...prev.slice(0, -1),
                 {
                   ...lastMessage,
-                  text:
-                    lastMessage.text.trimEnd() +
-                    value.replace("data:", ""),
+                  text: lastMessage.text.trimEnd() + value.replace("data:", ""),
                 },
               ];
             }
             return prev;
           });
-          console.log("Received", value);
         }
       } catch (error) {
         console.error("Error sending message:", error);
@@ -163,7 +163,7 @@ const MessagingWindow: React.FC = () => {
         style={{
           display: "flex",
           alignItems: "center",
-          
+
           justifyContent: "space-between",
           padding: "0px 4px 0px 4px",
           borderBottom: "1px solid #a0a0a0",
@@ -198,7 +198,6 @@ const MessagingWindow: React.FC = () => {
           padding: "4px",
           overflow: "hidden", // Ensure content doesn't overflow
           height: "calc(100% - 60px)",
-          
         }}
       >
         {/* Recipient Info */}

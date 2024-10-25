@@ -1,17 +1,16 @@
 import { Page, KeyInput } from "puppeteer";
 
-type Action = 
-    "key" |
-    "type" |
-    "mouse_move" |
-    "left_click" |
-    "left_click_drag" |
-    "right_click" |
-    "middle_click" |
-    "double_click" |
-    "screenshot" |
-    "cursor_position";
-
+type Action =
+  | "key"
+  | "type"
+  | "mouse_move"
+  | "left_click"
+  | "left_click_drag"
+  | "right_click"
+  | "middle_click"
+  | "double_click"
+  | "screenshot"
+  | "cursor_position";
 
 export async function goToUrl({
   page,
@@ -22,10 +21,10 @@ export async function goToUrl({
 }): Promise<{ newPage: Page; screenshot?: string }> {
   console.log(`Navigating to ${url}`);
   await page.goto(url, { waitUntil: "domcontentloaded" });
-  const screenshotBuffer = await page.screenshot({ encoding: 'base64' });
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  const screenshotBuffer = await page.screenshot({ encoding: "base64" });
   return { newPage: page, screenshot: screenshotBuffer };
 }
-
 
 export const saveToMemory = async ({
   page,
@@ -64,78 +63,87 @@ export async function claudeComputerTool({
   // Helper function to translate key names to Puppeteer-compatible keys
   function translateKey(key: string): KeyInput {
     const keyMap: { [key: string]: KeyInput } = {
-        Return: "Enter",
-        Enter: "Enter",
-        Tab: "Tab",
-        Backspace: "Backspace",
-        Up: "ArrowUp",
-        Down: "ArrowDown",
-        Left: "ArrowLeft",
-        Right: "ArrowRight",
-        Space: "Space",
-        Ctrl: "Control",
-        Control: "Control",
-        Alt: "Alt",
-        Shift: "Shift",
-        Meta: "Meta",
-        Command: "Meta",
-        Windows: "Meta",
-        Esc: "Escape",
-        Escape: "Escape",
-        // Numpad keys
-        KP_0: "Numpad0",
-        KP_1: "Numpad1",
-        KP_2: "Numpad2",
-        KP_3: "Numpad3",
-        KP_4: "Numpad4",
-        KP_5: "Numpad5",
-        KP_6: "Numpad6",
-        KP_7: "Numpad7",
-        KP_8: "Numpad8",
-        KP_9: "Numpad9",
-        // Add more mappings as needed
-        Page_Down: "PageDown",
-        Page_Up: "PageUp",
+      Return: "Enter",
+      Enter: "Enter",
+      Tab: "Tab",
+      Backspace: "Backspace",
+      Up: "ArrowUp",
+      Down: "ArrowDown",
+      Left: "ArrowLeft",
+      Right: "ArrowRight",
+      Space: "Space",
+      Ctrl: "Control",
+      Control: "Control",
+      Alt: "Alt",
+      Shift: "Shift",
+      Meta: "Meta",
+      Command: "Meta",
+      Windows: "Meta",
+      Esc: "Escape",
+      Escape: "Escape",
+      // Numpad keys
+      KP_0: "Numpad0",
+      KP_1: "Numpad1",
+      KP_2: "Numpad2",
+      KP_3: "Numpad3",
+      KP_4: "Numpad4",
+      KP_5: "Numpad5",
+      KP_6: "Numpad6",
+      KP_7: "Numpad7",
+      KP_8: "Numpad8",
+      KP_9: "Numpad9",
+      // Add more mappings as needed
+      Page_Down: "PageDown",
+      Page_Up: "PageUp",
 
-        // additional keys
-        // Additional mappings
-        // Function keys
-        F1: "F1", F2: "F2", F3: "F3", F4: "F4",
-        F5: "F5", F6: "F6", F7: "F7", F8: "F8",
-        F9: "F9", F10: "F10", F11: "F11", F12: "F12",
-        
-        // Navigation
-        Home: "Home",
-        End: "End",
-        Insert: "Insert",
-        Delete: "Delete",
-        
-        // Modifiers with directional variants
-        Shift_L: "ShiftLeft",
-        Shift_R: "ShiftRight",
-        Control_L: "ControlLeft",
-        Control_R: "ControlRight",
-        Alt_L: "AltLeft",
-        Alt_R: "AltRight",
-        
-        // Media keys
-        AudioVolumeMute: "AudioVolumeMute",
-        AudioVolumeDown: "AudioVolumeDown",
-        AudioVolumeUp: "AudioVolumeUp",
-        
-        // Additional special keys
-        Print: "PrintScreen",
-        Scroll_Lock: "ScrollLock",
-        Pause: "Pause",
-        Menu: "ContextMenu",
-        
-        // Numpad
-        KP_Enter: "NumpadEnter",
-        KP_Multiply: "NumpadMultiply",
-        KP_Add: "NumpadAdd",
-        KP_Subtract: "NumpadSubtract",
-        KP_Decimal: "NumpadDecimal",
-        KP_Divide: "NumpadDivide",
+      // additional keys
+      // Additional mappings
+      // Function keys
+      F1: "F1",
+      F2: "F2",
+      F3: "F3",
+      F4: "F4",
+      F5: "F5",
+      F6: "F6",
+      F7: "F7",
+      F8: "F8",
+      F9: "F9",
+      F10: "F10",
+      F11: "F11",
+      F12: "F12",
+
+      // Navigation
+      Home: "Home",
+      End: "End",
+      Insert: "Insert",
+      Delete: "Delete",
+
+      // Modifiers with directional variants
+      Shift_L: "ShiftLeft",
+      Shift_R: "ShiftRight",
+      Control_L: "ControlLeft",
+      Control_R: "ControlRight",
+      Alt_L: "AltLeft",
+      Alt_R: "AltRight",
+
+      // Media keys
+      AudioVolumeMute: "AudioVolumeMute",
+      AudioVolumeDown: "AudioVolumeDown",
+      AudioVolumeUp: "AudioVolumeUp",
+
+      // Additional special keys
+      Print: "PrintScreen",
+      Scroll_Lock: "ScrollLock",
+      Pause: "Pause",
+      Menu: "ContextMenu",
+
+      // Numpad
+      KP_Enter: "NumpadEnter",
+      KP_Multiply: "NumpadMultiply",
+      KP_Add: "NumpadAdd",
+      KP_Subtract: "NumpadSubtract",
+      KP_Decimal: "NumpadDecimal",
+      KP_Divide: "NumpadDivide",
     };
     return keyMap[key] || key;
   }
@@ -166,11 +174,13 @@ export async function claudeComputerTool({
         await page.mouse.down();
         // Define the drag destination; adjust as needed
         const dragDestination = { x: x + 100, y: y + 100 };
-        await page.mouse.move(dragDestination.x, dragDestination.y, { steps: 10 });
+        await page.mouse.move(dragDestination.x, dragDestination.y, {
+          steps: 10,
+        });
         await page.mouse.up();
       }
 
-      const screenshotBuffer = await page.screenshot({ encoding: 'base64' });
+      const screenshotBuffer = await page.screenshot({ encoding: "base64" });
       return { newPage: page, screenshot: screenshotBuffer };
     } else if (action === "key" || action === "type") {
       // Validate text input
@@ -211,7 +221,7 @@ export async function claudeComputerTool({
         await page.keyboard.type(text);
       }
 
-      const screenshotBuffer = await page.screenshot({ encoding: 'base64' });
+      const screenshotBuffer = await page.screenshot({ encoding: "base64" });
       return { newPage: page, screenshot: screenshotBuffer };
     } else if (
       [
@@ -233,8 +243,8 @@ export async function claudeComputerTool({
 
       if (action === "screenshot") {
         // Take a screenshot
-        
-        const screenshotBuffer = await page.screenshot({ encoding: 'base64' });
+
+        const screenshotBuffer = await page.screenshot({ encoding: "base64" });
         return { newPage: page, screenshot: screenshotBuffer };
       } else if (action === "cursor_position") {
         // Puppeteer does not support retrieving the cursor position
@@ -247,7 +257,10 @@ export async function claudeComputerTool({
         const y = viewport ? viewport.height / 2 : 0;
 
         let button: "left" | "right" | "middle" = "left";
-        let clickOptions: { button?: "left" | "right" | "middle"; clickCount?: number } = {};
+        let clickOptions: {
+          button?: "left" | "right" | "middle";
+          clickCount?: number;
+        } = {};
 
         if (action === "left_click") {
           button = "left";
@@ -263,7 +276,7 @@ export async function claudeComputerTool({
         // Perform the click action
         await page.mouse.click(x, y, { button, ...clickOptions });
 
-        const screenshotBuffer = await page.screenshot({ encoding: 'base64' });
+        const screenshotBuffer = await page.screenshot({ encoding: "base64" });
         return { newPage: page, screenshot: screenshotBuffer };
       }
     } else {
