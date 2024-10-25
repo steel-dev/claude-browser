@@ -129,12 +129,13 @@ const App: React.FC = () => {
           padding: "20px",
           height: "calc(100vh - 40px)",
           gap: "20px",
+          overflowY: "hidden",
         }}
       >
-        <div style={{ gridColumn: "span 1" }}>
+        <div style={{ gridColumn: "span 1", overflowY: "hidden" }}>
           <MessagingWindow />
         </div>
-        <div style={{ gridColumn: "span 2" }}>
+        <div style={{ gridColumn: "span 2", overflowY: "hidden" }}>
           <BrowserWindow />
         </div>
       </div>

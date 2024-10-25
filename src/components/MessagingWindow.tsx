@@ -276,7 +276,15 @@ const MessagingWindow: React.FC = () => {
       showHelp
       showMaximize
       showMinimize
+<<<<<<< Updated upstream
       style={{ height: "100%", display: "flex", flexDirection: "column" }}
+=======
+      style={{
+        height: "calc(100% - 4px)",
+        display: "flex",
+        flexDirection: "column",
+      }} // Ensure it fills and layouts properly
+>>>>>>> Stashed changes
     >
       {/* Menu Bar */}
       <div

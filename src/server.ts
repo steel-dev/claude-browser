@@ -32,7 +32,6 @@ fastify.post("/new-session", {
   handler: async (request: FastifyRequest, reply: FastifyReply) => {
     const session = await steel.sessions.create({
       sessionTimeout: 90000,
-      solveCaptcha: true,
     });
     reply.send(session);
   },
@@ -66,6 +65,46 @@ fastify.get("/live-viewer/:id", {
       events.forEach((event: any) => {
         console.log("metadata", event.metadata);
         reply.sse({ data: JSON.stringify(event) });
+      });
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket closed");
+      reply.sse({ data: JSON.stringify({ type: "close" }) });
+      reply.sseContext.source.end();
+    };
+  },
+});
+
+fastify.get("/events/:id", {
+  handler: async (
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) => {
+    const { id } = request.params;
+    const ws = new WebSocket(
+      `ws://steel-api-staging.fly.dev/v1/sessions/${id}/screencast?apiKey=${env.STEEL_API_KEY}`
+    );
+
+    const headers = {
+      "Content-Type": "text/event-stream",
+      Connection: "keep-alive",
+      "Cache-Control": "no-cache",
+      "Access-Control-Allow-Origin": "*",
+    };
+    reply.raw.writeHead(200, headers);
+
+    ws.onopen = () => {
+      console.log("WebSocket opened");
+      reply.sse({ data: JSON.stringify({ type: "open" }) });
+    };
+
+    ws.onmessage = (message) => {
+      const events = JSON.parse(message.data);
+      events.forEach((event: any) => {
+        if (event.event.type === 4) {
+          reply.sse({ data: JSON.stringify(event.event) });
+        }
       });
     };
 

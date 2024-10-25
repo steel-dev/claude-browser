@@ -12,6 +12,8 @@ const BrowserWindow: React.FC = () => {
   const frame = useSSE(
     `http://127.0.0.1:3001/live-viewer/${currentSession?.id}`
   );
+
+  const event = useSSE(`http://127.0.0.1:3001/events/${currentSession?.id}`);
   const [events, setEvents] = useState<any[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -19,17 +21,20 @@ const BrowserWindow: React.FC = () => {
   // const containerRef = useRef<HTMLDivElement>(null);
   // const playerCreatedRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvasSize, setCanvasSize] = useState({
-    width: parentRef.current?.clientWidth || 800,
-    height: parentRef.current?.clientHeight || 600,
-  });
+  const [canvasSize, setCanvasSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   const [latestImage, setLatestImage] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
-    if (frame && frame.data) {
+    if (frame && frame.data && parentRef.current) {
       const img = new Image();
       img.onload = () => {
-        setCanvasSize({ width: img.width, height: img.height });
+        const parentWidth = parentRef.current?.clientWidth || 0;
+        const scale = parentWidth / img.width;
+        const scaledHeight = img.height * scale;
+        setCanvasSize({ width: parentWidth, height: scaledHeight });
         setLatestImage(img);
       };
       img.onerror = (e) => {
@@ -43,13 +48,20 @@ const BrowserWindow: React.FC = () => {
     const renderFrame = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
-      if (canvas && ctx && latestImage) {
-        ctx.drawImage(latestImage, 0, 0, latestImage.width, latestImage.height);
+      if (canvas && ctx && latestImage && canvasSize) {
+        ctx.drawImage(latestImage, 0, 0, canvasSize.width, canvasSize.height);
       }
       requestAnimationFrame(renderFrame);
     };
     renderFrame();
-  }, [latestImage]);
+  }, [latestImage, canvasSize]);
+
+  useEffect(() => {
+    console.log("event", event);
+    if (event && event.data) {
+      setUrl(event.data.href);
+    }
+  }, [event]);
 
   // useEffect(() => {
   // if (frame) {
@@ -119,7 +131,7 @@ const BrowserWindow: React.FC = () => {
       showMaximize
       showMinimize
       showHelp
-      style={{ height: "100%", width: "100%" }} // Ensure it fills the parent
+      style={{ height: "fit-content", width: "100%" }} // Ensure it fills the parent
     >
       <div
         style={{
@@ -212,6 +224,7 @@ const BrowserWindow: React.FC = () => {
           ref={parentRef}
           style={{
             flex: 1,
+            height: "fit-content",
             backgroundColor: "#fff",
           }}
         >
@@ -221,11 +234,11 @@ const BrowserWindow: React.FC = () => {
           /> */}
           <canvas
             ref={canvasRef}
-            width={canvasSize.width}
-            height={canvasSize.height}
+            width={canvasSize?.width}
+            height={canvasSize?.height}
             style={{
-              width: "100%",
-              height: "100%",
+              minWidth: "400px",
+              minHeight: "300px",
               objectFit: "contain",
               maxHeight: "calc(100vh - 100px)",
             }}

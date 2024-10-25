@@ -129,7 +129,11 @@ export async function run(
     });
     let pages = await browser.pages();
     let page = pages[0];
+<<<<<<< Updated upstream
     await page.setViewport({ width: 1290, height: 800 });
+=======
+    await page.setViewport({ width: 1280, height: 800 });
+>>>>>>> Stashed changes
     // console.log("Launched browser");
 
     let messages: any[] = [];
