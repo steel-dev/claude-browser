@@ -1,20 +1,134 @@
-import React from "react";
-import useTime from "../hooks/useTime";
+import React, { useEffect, useRef, useState } from "react";
 import { Window, TextBox } from "react-windows-xp";
+import { useSession } from "../SessionContext/session.context";
+import { useSSE } from "../hooks/useSSE";
+// import rrwebPlayer from "rrweb-player";
+// import "rrweb-player/dist/style.css";
 
 const BrowserWindow: React.FC = () => {
-  const { time, error } = useTime();
+  // const { time, error } = useTime();
+  const { currentSession } = useSession();
+  const [url, setUrl] = useState("about:blank");
+  const frame = useSSE(
+    `http://127.0.0.1:3001/live-viewer/${currentSession?.id}`
+  );
+  const [events, setEvents] = useState<any[]>([]);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // const playerRef = useRef<rrwebPlayer | null>(null);
+  // const containerRef = useRef<HTMLDivElement>(null);
+  // const playerCreatedRef = useRef(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasSize, setCanvasSize] = useState({
+    width: parentRef.current?.clientWidth || 800,
+    height: parentRef.current?.clientHeight || 600,
+  });
+  const [latestImage, setLatestImage] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (frame && frame.data) {
+      const img = new Image();
+      img.onload = () => {
+        setCanvasSize({ width: img.width, height: img.height });
+        setLatestImage(img);
+      };
+      img.onerror = (e) => {
+        console.error("Error loading image:", e);
+      };
+      img.src = `data:image/jpeg;base64,${frame.data}`;
+    }
+  }, [frame]);
+
+  useEffect(() => {
+    const renderFrame = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (canvas && ctx && latestImage) {
+        ctx.drawImage(latestImage, 0, 0, latestImage.width, latestImage.height);
+      }
+      requestAnimationFrame(renderFrame);
+    };
+    renderFrame();
+  }, [latestImage]);
+
+  // useEffect(() => {
+  // if (frame) {
+  //   console.log(
+  //     `Current time: ${Date.now()}, frame time: ${
+  //       frame.timestamp
+  //     }, Difference: ${Date.now() - frame.timestamp}, type: ${
+  //       frame.type
+  //     }, player time: ${playerRef.current?.getReplayer().getCurrentTime()},
+  //     difference: ${
+  //       (playerRef.current?.getReplayer().getCurrentTime() || 0) -
+  //       frame.timestamp
+  //     }`
+  //   );
+  //   if (frame.type === 4) {
+  //     console.log("frame", frame);
+  //     setUrl(frame.data.href);
+  //   }
+  //   if (playerCreatedRef.current) {
+  //     playerRef.current?.addEvent(frame);
+  //   } else {
+  //     setEvents((prev) => [...prev, frame]);
+  //   }
+  // }
+
+  // if (frame) {
+  //   const img = new Image();
+  //   img.src = `data:image/jpeg;base64,${frame.data}`;
+  //   setLatestImage(img);
+  // }
+  // }, [frame]);
+
+  useEffect(() => {
+    // if (
+    //   events.length > 0 &&
+    //   !playerCreatedRef.current &&
+    //   containerRef.current
+    // ) {
+    //   playerRef.current = new rrwebPlayer({
+    //     target: containerRef.current,
+    //     props: {
+    //       events,
+    //       skipInactive: true,
+    //       liveMode: true,
+    //       width: parentRef.current?.clientWidth,
+    //       height: parentRef.current?.clientHeight,
+    //       mouseTail: false,
+    //       showController: false,
+    //     },
+    //   });
+    //   const BUFFER_MS = 350;
+    //   playerRef.current.getReplayer().play(Date.now() - BUFFER_MS);
+    //   playerCreatedRef.current = true;
+    // }
+    // return () => {
+    //   if (playerRef.current) {
+    //     playerRef.current = null;
+    //     playerCreatedRef.current = false;
+    //   }
+    // };
+  }, [events]);
 
   return (
     <Window
-      title="Steel Browser"
+      title={`Steel Browser - Session ID: ${currentSession?.id}`}
       showClose
       showMaximize
       showMinimize
       showHelp
       style={{ height: "100%", width: "100%" }} // Ensure it fills the parent
     >
-      <div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {/* Menu Bar */}
         <div
           style={{
@@ -73,7 +187,7 @@ const BrowserWindow: React.FC = () => {
                 border: "none",
                 outline: "none",
               }}
-              value="https://www.google.com.tw"
+              value={url}
             />
           </div>
           <button
@@ -95,25 +209,27 @@ const BrowserWindow: React.FC = () => {
 
         {/* Content Area */}
         <div
+          ref={parentRef}
           style={{
             flex: 1,
-            padding: "8px",
             backgroundColor: "#fff",
-            overflow: "auto",
           }}
         >
-          {error ? (
-            <div>Error: {error}</div>
-          ) : !time ? (
-            <div>Loading...</div>
-          ) : (
-            <div style={{ textAlign: "center", paddingTop: "100px" }}>
-              <img
-                src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
-                alt="Google"
-              />
-            </div>
-          )}
+          {/* <div
+            ref={containerRef}
+            style={{ width: "100%", maxHeight: "100%" }}
+          /> */}
+          <canvas
+            ref={canvasRef}
+            width={canvasSize.width}
+            height={canvasSize.height}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              maxHeight: "calc(100vh - 100px)",
+            }}
+          />
         </div>
 
         {/* Status Bar */}

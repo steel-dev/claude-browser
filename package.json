@@ -2,6 +2,9 @@
   "name": "claude-browser-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.2"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.1",
     "@fastify/cors": "^10.0.1",
@@ -21,6 +24,7 @@
     "react-dom": "^18.3.1",
     "react-scripts": "^5.0.1",
     "react-windows-xp": "^0.7.1",
+    "rrweb-player": "^1.0.0-alpha.4",
     "steel-sdk": "^0.1.0-alpha.1",
     "ts-node": "^10.9.2",
     "uuid": "^10.0.0",

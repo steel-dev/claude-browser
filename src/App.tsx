@@ -1,24 +1,23 @@
 import React, { useState } from "react";
-import "./App.css"; // Import the CSS file
 import BrowserWindow from "./components/BrowserWindow.tsx";
 import MessagingWindow from "./components/MessagingWindow.tsx";
 import { Wallpaper, Window, Button, TextBox } from "react-windows-xp";
+import { useSession } from "./SessionContext/session.context";
 
 const App: React.FC = () => {
-  const [apiKey, setApiKey] = useState<string>("");
-  const [isApiKeySubmitted, setIsApiKeySubmitted] = useState<boolean>(false);
+  const { currentSession, startSession, setClaudeAPIKey } = useSession();
   const [inputValue, setInputValue] = useState<string>("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (inputValue.trim()) {
-      setApiKey(inputValue.trim());
-      setIsApiKeySubmitted(true);
+      setClaudeAPIKey(inputValue.trim());
+      await startSession();
     } else {
       alert("Please enter a valid API key");
     }
   };
 
-  if (!isApiKeySubmitted) {
+  if (!currentSession) {
     // Render the popup window
     return (
       <Wallpaper fullScreen>
@@ -123,14 +122,21 @@ const App: React.FC = () => {
   // Render the main application once API key is submitted
   return (
     <Wallpaper fullScreen>
-      <div className="app-container">
-      <div className="messaging-window">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          padding: "20px",
+          height: "calc(100vh - 40px)",
+          gap: "20px",
+        }}
+      >
+        <div style={{ gridColumn: "span 1" }}>
           <MessagingWindow />
         </div>
-        <div className="browser-window">
+        <div style={{ gridColumn: "span 2" }}>
           <BrowserWindow />
         </div>
-        
       </div>
     </Wallpaper>
   );
