@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 
-export const useSSE = (url: string) => {
+export const useSSE = (url: string | null) => {
   const [data, setData] = useState<any | null>(null);
 
   useEffect(() => {
+    if (!url) return;
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = (event) => {

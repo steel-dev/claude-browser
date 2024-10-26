@@ -7,25 +7,23 @@ import { useSSE } from "../hooks/useSSE";
 
 const BrowserWindow: React.FC = () => {
   // const { time, error } = useTime();
-  const { currentSession } = useSession();
+  const { currentSession, isRestartingSession } = useSession();
   const [url, setUrl] = useState("about:blank");
   const frame = useSSE(
     `http://127.0.0.1:3001/live-viewer/${currentSession?.id}`
   );
 
   const event = useSSE(`http://127.0.0.1:3001/events/${currentSession?.id}`);
-  const [events, setEvents] = useState<any[]>([]);
+  const [events] = useState<any[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // const playerRef = useRef<rrwebPlayer | null>(null);
-  // const containerRef = useRef<HTMLDivElement>(null);
-  // const playerCreatedRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState<{
     width: number;
     height: number;
   } | null>(null);
   const [latestImage, setLatestImage] = useState<HTMLImageElement | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
 
   useEffect(() => {
     if (frame && frame.data && parentRef.current) {
@@ -33,8 +31,13 @@ const BrowserWindow: React.FC = () => {
       img.onload = () => {
         const parentWidth = parentRef.current?.clientWidth || 0;
         const scale = parentWidth / img.width;
-        const scaledHeight = img.height * scale;
-        setCanvasSize({ width: parentWidth, height: scaledHeight });
+        const aspectRatio = 16 / 9;
+        const scaledHeight = img.height / scale;
+        const targetHeight = parentWidth / aspectRatio;
+        setCanvasSize({
+          width: parentWidth,
+          height: targetHeight,
+        });
         setLatestImage(img);
       };
       img.onerror = (e) => {
@@ -48,20 +51,38 @@ const BrowserWindow: React.FC = () => {
     const renderFrame = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
-      if (canvas && ctx && latestImage && canvasSize) {
-        ctx.drawImage(latestImage, 0, 0, canvasSize.width, canvasSize.height);
+      if (canvas && ctx) {
+        if (isClearing) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        } else if (latestImage && canvasSize) {
+          ctx.drawImage(latestImage, 0, 0, canvasSize.width, canvasSize.height);
+        }
       }
       requestAnimationFrame(renderFrame);
     };
     renderFrame();
-  }, [latestImage, canvasSize]);
+  }, [latestImage, canvasSize, isClearing]);
 
   useEffect(() => {
-    console.log("event", event);
-    if (event && event.data) {
-      setUrl(event.data.href);
+    if (event) {
+      setUrl(event.url);
     }
   }, [event]);
+
+  useEffect(() => {
+    if (isRestartingSession) {
+      setUrl("about:blank");
+      setLatestImage(null);
+      setIsClearing(true);
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (canvas && ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    } else {
+      setIsClearing(false);
+    }
+  }, [isRestartingSession]);
 
   // useEffect(() => {
   // if (frame) {
@@ -192,14 +213,10 @@ const BrowserWindow: React.FC = () => {
               alt=""
               style={{ width: "16px", height: "16px", margin: "0 4px" }}
             />
-            <TextBox
-              id="address"
-              style={{
-                flex: 1,
-                border: "none",
-                outline: "none",
-              }}
+            <input
+              type="text"
               value={url}
+              style={{ flex: "1 1 0%", border: "none", outline: "none" }}
             />
           </div>
           <button

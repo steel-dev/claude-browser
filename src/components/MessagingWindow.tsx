@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Window, Button } from "react-windows-xp";
 import { useSession } from "../SessionContext/session.context";
-import { ExtendedMessage, Message } from "../types";
+import { ExtendedMessage } from "../types";
 import SystemPromptModal from "./SystemPromptModal";
 import ChatMessage from "./ChatMessage";
 
@@ -32,30 +32,31 @@ const CustomInput: React.FC<{
 );
 
 const MessagingWindow: React.FC = () => {
-  const [messages, setMessages] = useState<ExtendedMessage[]>(() => [
-    {
-      id: Date.now(),
-      text: "Welcome to Claude! I'm here to help you with any questions or tasks you have.",
-      timestamp: new Date(),
-      role: "system",
-      contentType: "system",
-    },
-  ]);
-  const [newMessage, setNewMessage] = useState<string>("");
-  // const { setIsSessionLoading, startSession } = useSession();
-  const [isLoading, setIsLoading] = useState(false); // This is for message loading
-  const [timer, setTimer] = useState<number>(0);
-  const [isSystemPromptOpen, setIsSystemPromptOpen] = useState(false);
-
   // Reference to the messages end for scrolling
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll to bottom whenever messages change
+
+  const {
+    currentSession,
+    restartSession,
+    chatHistory,
+    setChatHistory,
+    messages,
+    setMessages,
+    newMessage,
+    setNewMessage,
+    isMessageLoading,
+    setIsMessageLoading,
+    timer,
+    setTimer,
+    isSystemPromptOpen,
+    setIsSystemPromptOpen,
+  } = useSession();
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const { currentSession } = useSession();
 
   // Update messages when new SSE data is received
 
@@ -69,8 +70,32 @@ const MessagingWindow: React.FC = () => {
       };
 
       setMessages((prev) => [...prev, userMessage]);
+      const messages = [
+        ...chatHistory,
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: newMessage,
+            },
+          ],
+        },
+      ];
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: newMessage,
+            },
+          ],
+        },
+      ]);
       setNewMessage("");
-      setIsLoading(true);
+      setIsMessageLoading(true);
 
       try {
         const response = await fetch("http://127.0.0.1:3001/api/chat", {
@@ -78,7 +103,10 @@ const MessagingWindow: React.FC = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query: newMessage, id: currentSession?.id }),
+          body: JSON.stringify({
+            messages,
+            id: currentSession?.id,
+          }),
         });
 
         const reader = response.body!.getReader();
@@ -108,7 +136,7 @@ const MessagingWindow: React.FC = () => {
         }
 
         // Set loading state to false after the entire response is processed
-        setIsLoading(false);
+        setIsMessageLoading(false);
         console.log("===== Loading state set to false =====");
       } catch (error) {
         console.error("Error sending message:", error);
@@ -122,7 +150,7 @@ const MessagingWindow: React.FC = () => {
             contentType: "error",
           },
         ]);
-        setIsLoading(false);
+        setIsMessageLoading(false);
       }
     }
   };
@@ -158,6 +186,7 @@ const MessagingWindow: React.FC = () => {
         break;
       case "content_block_start":
         const contentBlock = data.content_block;
+        console.log("contentBlock", contentBlock);
         const newMessage: ExtendedMessage = {
           id: Date.now() + data.index,
           text: "",
@@ -168,6 +197,7 @@ const MessagingWindow: React.FC = () => {
           contentIndex: data.index,
           partialInput: "",
           name: contentBlock.name, // For 'tool_use' content blocks
+          toolUseId: contentBlock.id,
         };
         setMessages((prev) => [...prev, newMessage]);
         break;
@@ -200,6 +230,7 @@ const MessagingWindow: React.FC = () => {
 
       case "content_block_stop":
         const stopIndex = data.index;
+
         setMessages((prev) =>
           prev.map((msg) => {
             if (msg.contentIndex === stopIndex && msg.isStreaming) {
@@ -211,10 +242,93 @@ const MessagingWindow: React.FC = () => {
                   updatedText = `Tool used: ${
                     msg.name
                   }\nInput: ${JSON.stringify(inputObj, null, 2)}`;
+                  setChatHistory((prev) => {
+                    const lastMessage = prev[prev.length - 1];
+                    if (lastMessage.role === "assistant") {
+                      // Check if the content already exists
+                      const contentExists = lastMessage.content.some(
+                        (item) => item.id === msg.toolUseId
+                      );
+                      if (!contentExists) {
+                        return [
+                          ...prev.slice(0, -1),
+                          {
+                            ...lastMessage,
+                            content: [
+                              ...lastMessage.content,
+                              {
+                                id: msg.toolUseId,
+                                type: msg.contentType,
+                                name: msg.name,
+                                input: inputObj,
+                              },
+                            ],
+                          },
+                        ];
+                      }
+                    } else {
+                      return [
+                        ...prev,
+                        {
+                          role: "assistant",
+                          content: [
+                            {
+                              id: msg.toolUseId,
+                              type: msg.contentType,
+                              name: msg.name,
+                              input: inputObj,
+                            },
+                          ],
+                        },
+                      ];
+                    }
+                    return prev;
+                  });
                 } catch (error) {
                   console.error("Failed to parse tool input JSON", error);
                   updatedText = `Tool used: ${msg.name}\nInvalid input JSON`;
                 }
+              } else {
+                setChatHistory((prev) => {
+                  const lastMessage = prev[prev.length - 1];
+                  if (lastMessage.role === "assistant") {
+                    // Check if the content already exists
+                    const contentExists = lastMessage.content.some(
+                      (item) =>
+                        item.type === msg.contentType &&
+                        item.text === updatedText
+                    );
+                    if (!contentExists) {
+                      return [
+                        ...prev.slice(0, -1),
+                        {
+                          ...lastMessage,
+                          content: [
+                            ...lastMessage.content,
+                            {
+                              type: msg.contentType,
+                              text: updatedText,
+                            },
+                          ],
+                        },
+                      ];
+                    }
+                  } else {
+                    return [
+                      ...prev,
+                      {
+                        role: "assistant",
+                        content: [
+                          {
+                            type: msg.contentType,
+                            text: updatedText,
+                          },
+                        ],
+                      },
+                    ];
+                  }
+                  return prev;
+                });
               }
 
               return {
@@ -261,7 +375,7 @@ const MessagingWindow: React.FC = () => {
 
   const handleStop = (): void => {
     console.log("stopped");
-    setIsLoading(false);
+    setIsMessageLoading(false);
     // Additional logic to stop the API request can be added here
   };
 
@@ -295,20 +409,40 @@ const MessagingWindow: React.FC = () => {
           height: "30px",
         }}
       >
-        <div style={{ display: "flex", gap: "16px" }}>
-          <a href="#" style={{ textDecoration: "underline", color: "black" }}>
+        <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
+          <button
+            style={{
+              textDecoration: "underline",
+              color: "black",
+              border: "none",
+              background: "none",
+              padding: "0px",
+              margin: "0px",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              restartSession(currentSession?.id);
+            }}
+          >
             Restart Session
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
             onClick={(e) => {
               e.preventDefault();
               setIsSystemPromptOpen(true);
             }}
-            style={{ textDecoration: "underline", color: "black" }}
+            style={{
+              textDecoration: "underline",
+              color: "black",
+              border: "none",
+              background: "none",
+              padding: "0px",
+              margin: "0px",
+              cursor: "pointer",
+            }}
           >
             Change System Prompt
-          </a>
+          </button>
         </div>
       </div>
 
@@ -369,13 +503,13 @@ const MessagingWindow: React.FC = () => {
             <CustomInput
               value={newMessage}
               onChange={setNewMessage}
-              disabled={isLoading}
+              disabled={isMessageLoading}
               onKeyDown={handleKeyDown}
               autoFocus
             />
             <Button
-              onClick={isLoading ? handleStop : handleSend}
-              disabled={isLoading}
+              onClick={isMessageLoading ? handleStop : handleSend}
+              disabled={isMessageLoading}
               style={{
                 width: "50px",
                 height: "50px",
@@ -384,7 +518,7 @@ const MessagingWindow: React.FC = () => {
                 border: "1px solid #7F9DB9",
               }}
             >
-              {isLoading ? "Stop ◽" : "Send"}
+              {isMessageLoading ? "Stop ◽" : "Send"}
             </Button>
           </div>
         </div>

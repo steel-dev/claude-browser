@@ -1,9 +1,10 @@
-import { run } from "./browser_agent_service/index";
+import { releaseSession, run } from "./browser_agent_service/index";
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import cors from "@fastify/cors";
 import { FastifySSEPlugin } from "fastify-sse-v2";
 import Steel from "steel-sdk";
 import { env } from "./env";
+import EventEmitter from "events";
 
 export const steel = new Steel({
   steelAPIKey: process.env.STEEL_API_KEY,
@@ -12,13 +13,17 @@ export const steel = new Steel({
 
 const fastify = Fastify({
   logger: true,
+  bodyLimit: 104857600,
 });
+
+export const messenger = new EventEmitter().setMaxListeners(0);
 
 // Define request interface
 interface ChatRequest {
   Body: {
-    query: string;
+    messages: any[];
     id: string;
+    systemPrompt?: string;
   };
 }
 
@@ -34,6 +39,20 @@ fastify.post("/new-session", {
       sessionTimeout: 300000,
     });
     reply.send(session);
+  },
+});
+
+fastify.get("/release-session/:id", {
+  handler: async (
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      const session = await releaseSession(request.params.id);
+      reply.send(session);
+    } catch (e) {
+      reply.status(500).send({ error: "Failed to release session" });
+    }
   },
 });
 
@@ -63,7 +82,6 @@ fastify.get("/live-viewer/:id", {
     ws.onmessage = (message) => {
       const events = JSON.parse(message.data);
       events.forEach((event: any) => {
-        console.log("metadata", event.metadata);
         reply.sse({ data: JSON.stringify(event) });
       });
     };
@@ -82,9 +100,6 @@ fastify.get("/events/:id", {
     reply: FastifyReply
   ) => {
     const { id } = request.params;
-    const ws = new WebSocket(
-      `ws://steel-api-staging.fly.dev/v1/sessions/${id}/screencast?apiKey=${env.STEEL_API_KEY}`
-    );
 
     const headers = {
       "Content-Type": "text/event-stream",
@@ -94,25 +109,34 @@ fastify.get("/events/:id", {
     };
     reply.raw.writeHead(200, headers);
 
-    ws.onopen = () => {
-      console.log("WebSocket opened");
-      reply.sse({ data: JSON.stringify({ type: "open" }) });
-    };
+    messenger.on("url-changed", (data) => {
+      if (data.id === id) {
+        reply.sse({ data: JSON.stringify(data) });
+      }
+    });
+  },
+});
 
-    ws.onmessage = (message) => {
-      const events = JSON.parse(message.data);
-      events.forEach((event: any) => {
-        if (event.event.type === 4) {
-          reply.sse({ data: JSON.stringify(event.event) });
-        }
-      });
-    };
+fastify.get("/tool-results/:id", {
+  handler: async (
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) => {
+    const { id } = request.params;
 
-    ws.onclose = () => {
-      console.log("WebSocket closed");
-      reply.sse({ data: JSON.stringify({ type: "close" }) });
-      reply.sseContext.source.end();
+    const headers = {
+      "Content-Type": "text/event-stream",
+      Connection: "keep-alive",
+      "Cache-Control": "no-cache",
+      "Access-Control-Allow-Origin": "*",
     };
+    reply.raw.writeHead(200, headers);
+
+    messenger.on("tool-result", (data) => {
+      if (data.id === id) {
+        reply.sse({ data: JSON.stringify(data.message) });
+      }
+    });
   },
 });
 
@@ -121,10 +145,11 @@ fastify.post("/api/chat", {
   schema: {
     body: {
       type: "object",
-      required: ["query", "id"],
+      required: ["messages", "id"],
       properties: {
-        query: { type: "string" },
+        messages: { type: "array" },
         id: { type: "string" },
+        systemPrompt: { type: "string" },
       },
     },
   },
@@ -132,11 +157,11 @@ fastify.post("/api/chat", {
     request: FastifyRequest<ChatRequest>,
     reply: FastifyReply
   ) => {
-    const { query, id } = request.body;
+    const { messages, id, systemPrompt } = request.body;
     // Set headers for Server-Sent Events
-    reply.raw.setHeader('Content-Type', 'text/event-stream');
-    reply.raw.setHeader('Cache-Control', 'no-cache');
-    reply.raw.setHeader('Connection', 'keep-alive');
+    reply.raw.setHeader("Content-Type", "text/event-stream");
+    reply.raw.setHeader("Cache-Control", "no-cache");
+    reply.raw.setHeader("Connection", "keep-alive");
 
     // Create a callback function to handle streaming outputs
     const onAgentOutput = (event: any) => {
@@ -144,10 +169,10 @@ fastify.post("/api/chat", {
     };
 
     try {
-      await run({ query, id }, onAgentOutput);
+      await run({ messages, id, systemPrompt }, onAgentOutput);
     } catch (error) {
       console.error("Error in AI agent:", error);
-      reply.sse({ event: 'error', data: 'An error occurred' });
+      reply.sse({ event: "error", data: "An error occurred" });
     } finally {
       reply.sseContext.source.end();
     }

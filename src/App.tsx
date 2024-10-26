@@ -125,6 +125,7 @@ const App: React.FC = () => {
   // Render the main application once API key is submitted
   return (
     <Wallpaper fullScreen>
+      <LoadingModal isOpen={isSessionLoading} />
       <div
         style={{
           display: "grid",
