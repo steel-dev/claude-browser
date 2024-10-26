@@ -1,4 +1,11 @@
 import { Page, KeyInput } from "puppeteer";
+import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
+import { getAdjustedCoordinates } from './helpers';
+
+// Global wait time in milliseconds before taking a screenshot
+const screenshotWaitTimeMs = 1000; // Adjust this value as needed
 
 type Action =
   | "key"
@@ -12,6 +19,10 @@ type Action =
   | "screenshot"
   | "cursor_position";
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function goToUrl({
   page,
   url,
@@ -21,6 +32,10 @@ export async function goToUrl({
 }): Promise<{ newPage: Page; screenshot?: string }> {
   console.log(`Navigating to ${url}`);
   await page.goto(url, { waitUntil: "domcontentloaded" });
+
+  // Wait before taking the screenshot
+  await sleep(screenshotWaitTimeMs);
+
   const screenshotBuffer = await page.screenshot({ encoding: "base64" });
   
   return { newPage: page, screenshot: screenshotBuffer };
@@ -37,6 +52,46 @@ export const saveToMemory = async ({
   // Implement your memory saving logic here
   return { newPage: page, content: "successfully saved to memory" };
 };
+
+// Add this helper function near the top of the file
+async function drawCircleOnScreenshot(
+  screenshotBuffer: string,
+  x: number,
+  y: number
+): Promise<string> {
+  const buffer = Buffer.from(screenshotBuffer, 'base64');
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `screenshot-${timestamp}.png`;
+  const outputPath = path.join(process.cwd(), 'screenshots', filename);
+
+  // Ensure screenshots directory exists
+  const dir = path.join(process.cwd(), 'screenshots');
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  // Create an SVG circle
+  const svg = `
+    <svg width="20" height="20">
+      <circle cx="10" cy="10" r="5" fill="red" />
+    </svg>
+  `;
+
+  // Composite the circle onto the screenshot
+  await sharp(buffer)
+    .composite([
+      {
+        input: Buffer.from(svg),
+        top: Math.max(0, y - 10),
+        left: Math.max(0, x - 10),
+      },
+    ])
+    .toFile(outputPath);
+
+  // Return base64 of the new image
+  const newBuffer = await fs.promises.readFile(outputPath);
+  return newBuffer.toString('base64');
+}
 
 export async function claudeComputerTool({
   action,
@@ -148,6 +203,7 @@ export async function claudeComputerTool({
     };
     return keyMap[lowercaseKey] || key;
   }
+  
 
   try {
     if (action === "mouse_move" || action === "left_click_drag") {
@@ -181,8 +237,12 @@ export async function claudeComputerTool({
         await page.mouse.up();
       }
 
+      // Wait before taking the screenshot
+      await sleep(screenshotWaitTimeMs);
+
       const screenshotBuffer = await page.screenshot({ encoding: "base64" });
-      return { newPage: page, screenshot: screenshotBuffer };
+      const markedScreenshot = await drawCircleOnScreenshot(screenshotBuffer, x, y);
+      return { newPage: page, screenshot: markedScreenshot };
     } else if (action === "key" || action === "type") {
       // Validate text input
       if (text === undefined) {
@@ -222,6 +282,9 @@ export async function claudeComputerTool({
         await page.keyboard.type(text);
       }
 
+      // Wait before taking the screenshot
+      await sleep(screenshotWaitTimeMs);
+
       const screenshotBuffer = await page.screenshot({ encoding: "base64" });
       return { newPage: page, screenshot: screenshotBuffer };
     } else if (
@@ -243,7 +306,8 @@ export async function claudeComputerTool({
       }
 
       if (action === "screenshot") {
-        // Take a screenshot
+        // Wait before taking the screenshot
+        await sleep(screenshotWaitTimeMs);
 
         const screenshotBuffer = await page.screenshot({ encoding: "base64" });
         return { newPage: page, screenshot: screenshotBuffer };
@@ -253,9 +317,9 @@ export async function claudeComputerTool({
       } else {
         // Click actions
         // Default to clicking at the center of the viewport
-        const viewport = page.viewport();
-        const x = viewport ? viewport.width / 2 : 0;
-        const y = viewport ? viewport.height / 2 : 0;
+        // const viewport = page.viewport();
+        // const x = viewport ? viewport.width / 2 : 0;
+        // const y = viewport ? viewport.height / 2 : 0;
 
         let button: "left" | "right" | "middle" = "left";
         let clickOptions: {
@@ -273,9 +337,14 @@ export async function claudeComputerTool({
           button = "left";
           clickOptions.clickCount = 2;
         }
-
+        //const { x: adjustedX, y: adjustedY } = await getAdjustedCoordinates(page, x, y);
         // Perform the click action
-        await page.mouse.click(x, y, { button, ...clickOptions });
+        
+        await page.mouse.down({ button, ...clickOptions });
+        await page.mouse.up({ button, ...clickOptions });
+
+        // Wait before taking the screenshot
+        await sleep(screenshotWaitTimeMs);
 
         const screenshotBuffer = await page.screenshot({ encoding: "base64" });
         return { newPage: page, screenshot: screenshotBuffer };

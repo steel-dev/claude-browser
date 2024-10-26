@@ -159,7 +159,7 @@ export async function run(
       let currentContentIndex: number = -1;
 
       // Call the API
-      console.log("MAKING MODEL CALL", JSON.stringify(messages, null, 2));
+      //console.log("MAKING MODEL CALL", JSON.stringify(messages, null, 2));
       const response = await anthropic.beta.messages.create({
         model: "claude-3-5-sonnet-20241022",
         max_tokens: 4096,
@@ -206,7 +206,7 @@ export async function run(
             currentContentBlock.input &&
             currentContentBlock.input.endsWith("}")
           ) {
-            console.log("PARSING JSON", currentContentBlock.input);
+            //console.log("PARSING JSON", currentContentBlock.input);
             currentContentBlock.input = JSON.parse(currentContentBlock.input);
           }
           assistantMessage.content.push(currentContentBlock);
@@ -217,10 +217,10 @@ export async function run(
       }
 
       // At this point, we've received the full assistant message
-      console.log(
-        "Assistant Message:",
-        JSON.stringify(assistantMessage, null, 2)
-      );
+      // console.log(
+      //   "Assistant Message:",
+      //   JSON.stringify(assistantMessage, null, 2)
+      // );
 
       // Append assistant's response to messages
       messages.push(assistantMessage);
