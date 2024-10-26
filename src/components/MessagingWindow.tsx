@@ -544,9 +544,6 @@ const MessagingWindow: React.FC = () => {
       <SystemPromptModal
         isOpen={isSystemPromptOpen}
         onClose={() => setIsSystemPromptOpen(false)}
-        onSave={(newPrompt: string) => {
-          console.log("New system prompt:", newPrompt);
-        }}
       />
     </Window>
   );

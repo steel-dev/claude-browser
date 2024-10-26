@@ -47,16 +47,17 @@ const App: React.FC = () => {
               />
               <div style={{ marginBottom: "20px" }}>
                 <p>
-                  <b>Welcome to the Claude Browser!</b>
+                  <b>Welcome to the Claude Browser Assistant!</b>
                 </p>
                 <p>
-                  This is a demo of Claude the newest version of Anthropic's
-                  Computer use model API controlling a browser in the cloud.
+                  This is a demo app of Anthropic's new <a href="https://x.com/AnthropicAI/status/1848742752403476488">Computer Use model API</a>
+                  (upgraded claude 3.5 sonnet) refactored to control a browser in the cloud.
                   Powered by <a href="https://steel.dev">steel.dev</a>.
                 </p>
                 <p>
-                  We've mapped the computer use tools controls to puppeteer
-                  actions to drive the browser. Note that tools you may have
+                  Give it a try and let claude be your AI browsing assistant,
+                  capable of understanding/interacting with any website and
+                  executing long running tasks. Note that tools you may have
                   seen in demos like the bash and file system navigation are not
                   supported yet.
                 </p>
@@ -75,7 +76,7 @@ const App: React.FC = () => {
                     agents.
                   </p>
                 </div>
-                <div style={{ flex: 1, padding: "10px", textAlign: "right" }}>
+                <div style={{ display: "inline-block", padding: "10px", textAlign: "right" }}>
                   <a
                     href="https://tally.so/r/mZR6ZB"
                     style={{

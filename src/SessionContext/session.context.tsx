@@ -20,11 +20,16 @@ interface SessionContextProps {
   isMessageLoading: boolean;
   timer: number;
   isSystemPromptOpen: boolean;
+  temperature: number;
+  numImagesToKeep: number;
+  waitTime: number;
   setMessages: React.Dispatch<React.SetStateAction<ExtendedMessage[]>>;
   setNewMessage: React.Dispatch<React.SetStateAction<string>>;
   setIsMessageLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setTimer: React.Dispatch<React.SetStateAction<number>>;
   setIsSystemPromptOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setNumImagesToKeep: React.Dispatch<React.SetStateAction<number>>;
+  setWaitTime: React.Dispatch<React.SetStateAction<number>>;
   startSession: () => Promise<Record<string, any>>;
   restartSession: (id: string) => Promise<Record<string, any>>;
   setIsSessionLoading: (loading: boolean) => void; // renamed from setIsLoading
@@ -32,6 +37,19 @@ interface SessionContextProps {
   setSystemPrompt: React.Dispatch<React.SetStateAction<string>>;
   setChatHistory: React.Dispatch<React.SetStateAction<Record<string, any>[]>>;
   setIsRestartingSession: React.Dispatch<React.SetStateAction<boolean>>;
+  save: ({
+    prompt,
+    temperature,
+    numImagesToKeep,
+    waitTime,
+    apiKey,
+  }: {
+    prompt: string;
+    temperature: number;
+    numImagesToKeep: number;
+    waitTime: number;
+    apiKey: string;
+  }) => void;
 }
 
 const SessionContext = createContext<SessionContextProps | undefined>(
@@ -51,10 +69,13 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     `You are Claude, an AI assistant. You are controlling a browser in the cloud using steel.dev's browser API. You can help users by browsing the web and performing tasks for them.`
   );
   const [chatHistory, setChatHistory] = useState<Record<string, any>[]>([]);
+  const [temperature, setTemperature] = useState<number>(1.0);
+  const [numImagesToKeep, setNumImagesToKeep] = useState<number>(10);
+  const [waitTime, setWaitTime] = useState<number>(1);
   const [messages, setMessages] = useState<ExtendedMessage[]>(() => [
     {
       id: Date.now(),
-      text: "Welcome to Claude! I'm here to help you with any questions or tasks you have.",
+      text: "Welcome, I'm Claude and I'll be your browsing assistant! I have full access to a browser and can help with all sorts of tasks you need.",
       timestamp: new Date(),
       role: "system",
       contentType: "system",
@@ -174,6 +195,12 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         setTimer,
         isSystemPromptOpen,
         setIsSystemPromptOpen,
+        temperature,
+        numImagesToKeep,
+        waitTime,
+        setNumImagesToKeep,
+        setWaitTime,
+        save,
       }}
     >
       {children}

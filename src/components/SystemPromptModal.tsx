@@ -1,26 +1,116 @@
-import React, { useState } from "react";
-import { Window, Button, Slider, TextBox } from "react-windows-xp";
+import React, { useState, useEffect } from "react";
+import { Window, Button, TextBox } from "react-windows-xp";
+import { useSession } from "../SessionContext/session.context";
 
 interface SystemPromptModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (prompt: string) => void;
-  initialPrompt?: string;
 }
 
-const SystemPromptModal: React.FC<SystemPromptModalProps> = ({
-  isOpen,
-  onClose,
-  onSave,
-  initialPrompt = "You are Claude, an AI assistant. You are controlling a browser in the cloud using steel.dev's browser API. You can help users by browsing the web and performing tasks for them.",
-}) => {
-  const [prompt, setPrompt] = useState(initialPrompt);
+const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }) => {
+  const {
+    systemPrompt: sessionSystemPrompt,
+    temperature: sessionTemperature,
+    numImagesToKeep: sessionNumImagesToKeep,
+    waitTime: sessionWaitTime,
+    apiKey: sessionClaudeAPIKey,
+    save,
+    restartSession,
+  } = useSession();
+
+  // Local component state for form fields
+  const [localSystemPrompt, setLocalSystemPrompt] = useState("");
+  const [temperature, setTemperature] = useState<number>(0.7);
+  const [numImagesToKeep, setNumImagesToKeep] = useState<number>(10);
+  const [waitTime, setWaitTime] = useState<number>(1);
+  const [claudeAPIKey, setClaudeAPIKey] = useState("");
+
+  // Add state for temporary temperature input
+  const [tempInput, setTempInput] = useState<string>("");
+
+  // Initialize local state from session context when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setLocalSystemPrompt(sessionSystemPrompt || "");
+      setTemperature(sessionTemperature || 0.7);
+      setTempInput((sessionTemperature || 0.7).toString());
+      setNumImagesToKeep(sessionNumImagesToKeep || 10);
+      setWaitTime(Math.max(1, (sessionWaitTime || 1000) / 1000)); // Ensure minimum of 1 second
+      setClaudeAPIKey(sessionClaudeAPIKey || "");
+    }
+  }, [
+    isOpen,
+    sessionSystemPrompt,
+    sessionTemperature,
+    sessionNumImagesToKeep,
+    sessionWaitTime,
+    sessionClaudeAPIKey,
+  ]);
 
   if (!isOpen) return null;
 
+  // Input change handlers with validation
+  const handleTemperatureChange = (value: string) => {
+    setTempInput(value); // Allow any input while typing
+  };
+
+  const handleTemperatureBlur = () => {
+    const numValue = parseFloat(tempInput);
+    if (isNaN(numValue) || numValue < 0 || numValue > 1) {
+      // Invalid input, reset to default
+      setTemperature(1);
+      setTempInput("1");
+    } else {
+      // Valid input, update temperature
+      setTemperature(numValue);
+      setTempInput(numValue.toString());
+    }
+  };
+
+  const handleNumImagesToKeepChange = (value: string) => {
+    if (value === "") {
+      // If input is empty, set number of images to zero
+      setNumImagesToKeep(1);
+    } else {
+      const numValue = parseInt(value);
+      if (!isNaN(numValue)) {
+        setNumImagesToKeep(numValue);
+      }
+    }
+  };
+
+  const handleWaitTimeChange = (value: string) => {
+    if (value === "") {
+      // If input is empty, set wait time to zero
+      setWaitTime(0);
+    } else {
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue)) {
+        setWaitTime(numValue);
+      }
+    }
+  };
+
+  const handleClaudeAPIKeyChange = (value: string) => {
+    setClaudeAPIKey(value);
+  };
+
+  const handleLocalSystemPromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLocalSystemPrompt(e.target.value);
+  };
+
+  // Save changes to session context when user clicks "Save"
   const handleSave = () => {
-    onSave(prompt);
+
+    save({
+      prompt: localSystemPrompt,
+      temperature: temperature,
+      numImagesToKeep: numImagesToKeep,
+      waitTime: waitTime,
+      apiKey: claudeAPIKey,
+    });
     onClose();
+    restartSession();
   };
 
   return (
@@ -42,13 +132,19 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({
         title="Agent Settings"
         showClose
         onClose={onClose}
-        style={{ width: "500px", height: "auto", display: "flex", flexDirection: "column" }}
+        style={{
+          width: "500px",
+          height: "auto",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
         <div style={{ padding: "16px" }}>
+          {/* System Prompt */}
           <p style={{ marginBottom: "8px" }}>Edit the system prompt below:</p>
           <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            value={localSystemPrompt}
+            onChange={handleLocalSystemPromptChange}
             style={{
               width: "100%",
               height: "200px",
@@ -59,29 +155,49 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({
               fontFamily: "inherit",
             }}
           />
-          <div style={{ width: "50%", marginRight: "auto", marginTop: "16px" }}>
+          <p style={{ marginBottom: "8px" }}>
+            Note: We automatically append the current datetime + memory to the bottom of the system prompt.
+          </p>
+
+          {/* Form Fields */}
+          <div style={{ marginTop: "16px" }}>
             <TextBox
-              id="text-1"
+              id="text-temperature"
               label="Temperature"
-              onChange={function noRefCheck() {}}
-              placeholder="0.7"
+              onChange={handleTemperatureChange}
+              onBlur={handleTemperatureBlur}
+              placeholder="1"
+              value={tempInput}
               stacked
             />
             <TextBox
-              id="text-1"
-              label="Num images to keep"
-              onChange={function noRefCheck() {}}
+              id="text-num-images"
+              label="Number of Images to Keep"
+              onChange={handleNumImagesToKeepChange}
               placeholder="10"
+              value={numImagesToKeep.toString()}
               stacked
             />
             <TextBox
-              id="text-1"
-              label="New Claude API Key"
-              onChange={function noRefCheck() {}}
-              placeholder="sk-ant-api03-..."
+              id="text-wait-time"
+              label="Wait Time Between Actions (seconds)"
+              onChange={handleWaitTimeChange}
+              placeholder="1"
+              value={waitTime.toString()}
               stacked
+            />
+            <TextBox
+              id="text-api-key"
+              label="Claude API Key"
+              onChange={handleClaudeAPIKeyChange}
+              placeholder="sk-ant-api03-..."
+              value={claudeAPIKey}
+              stacked
+              type="password"
             />
           </div>
+
+          {/* Buttons */}
           <div
             style={{
               display: "flex",
