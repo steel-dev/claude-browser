@@ -1,8 +1,9 @@
 import { Page, KeyInput } from "puppeteer";
-import sharp from 'sharp';
-import fs from 'fs';
-import path from 'path';
-import { getAdjustedCoordinates } from './helpers';
+import sharp from "sharp";
+import fs from "fs";
+import path from "path";
+import { getAdjustedCoordinates } from "./helpers";
+import { errorImage } from "./consts";
 
 // Global wait time in milliseconds before taking a screenshot
 const screenshotWaitTimeMs = 1000; // Adjust this value as needed
@@ -20,9 +21,8 @@ type Action =
   | "cursor_position";
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
 export async function goToUrl({
   page,
   url,
@@ -30,14 +30,23 @@ export async function goToUrl({
   page: Page;
   url: string;
 }): Promise<{ newPage: Page; screenshot?: string }> {
-  console.log(`Navigating to ${url}`);
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-
+  try {
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+  } catch (error) {
+    if (`${error}`.includes("Navigation timeout")) {
+      console.error(`Navigation timeout to ${url}`);
+      const screenshotBuffer = await page.screenshot({ encoding: "base64" });
+      return { newPage: page, screenshot: screenshotBuffer };
+    } else {
+      console.error(`Error navigating to ${url}: ${error}`);
+      return { newPage: page, screenshot: errorImage };
+    }
+  }
   // Wait before taking the screenshot
   await sleep(screenshotWaitTimeMs);
 
   const screenshotBuffer = await page.screenshot({ encoding: "base64" });
-  
+
   return { newPage: page, screenshot: screenshotBuffer };
 }
 
@@ -59,13 +68,13 @@ async function drawCircleOnScreenshot(
   x: number,
   y: number
 ): Promise<string> {
-  const buffer = Buffer.from(screenshotBuffer, 'base64');
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const buffer = Buffer.from(screenshotBuffer, "base64");
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const filename = `screenshot-${timestamp}.png`;
-  const outputPath = path.join(process.cwd(), 'screenshots', filename);
+  const outputPath = path.join(process.cwd(), "screenshots", filename);
 
   // Ensure screenshots directory exists
-  const dir = path.join(process.cwd(), 'screenshots');
+  const dir = path.join(process.cwd(), "screenshots");
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -90,7 +99,7 @@ async function drawCircleOnScreenshot(
 
   // Return base64 of the new image
   const newBuffer = await fs.promises.readFile(outputPath);
-  return newBuffer.toString('base64');
+  return newBuffer.toString("base64");
 }
 
 export async function claudeComputerTool({
@@ -203,7 +212,6 @@ export async function claudeComputerTool({
     };
     return keyMap[lowercaseKey] || key;
   }
-  
 
   try {
     if (action === "mouse_move" || action === "left_click_drag") {
@@ -241,7 +249,11 @@ export async function claudeComputerTool({
       await sleep(screenshotWaitTimeMs);
 
       const screenshotBuffer = await page.screenshot({ encoding: "base64" });
-      const markedScreenshot = await drawCircleOnScreenshot(screenshotBuffer, x, y);
+      const markedScreenshot = await drawCircleOnScreenshot(
+        screenshotBuffer,
+        x,
+        y
+      );
       return { newPage: page, screenshot: markedScreenshot };
     } else if (action === "key" || action === "type") {
       // Validate text input
@@ -339,7 +351,7 @@ export async function claudeComputerTool({
         }
         //const { x: adjustedX, y: adjustedY } = await getAdjustedCoordinates(page, x, y);
         // Perform the click action
-        
+
         await page.mouse.down({ button, ...clickOptions });
         await page.mouse.up({ button, ...clickOptions });
 

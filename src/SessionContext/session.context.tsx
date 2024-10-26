@@ -104,30 +104,49 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const restartSession = async (id: string) => {
-    setIsRestartingSession(true);
-    setIsSessionLoading(true);
-    setMessages([
-      {
-        id: Date.now(),
-        text: "Welcome to Claude! I'm here to help you with any questions or tasks you have.",
-        timestamp: new Date(),
-        role: "system",
-        contentType: "system",
-      },
-    ]);
-    setNewMessage("");
-    setTimer(0);
-    setIsSystemPromptOpen(false);
-    setIsMessageLoading(false);
-    setChatHistory([]);
-    releaseSession(id);
-    const newSession = await createSession();
-    setCurrentSession(newSession);
-    setIsSessionLoading(false);
-    setIsRestartingSession(false);
-    return newSession;
+  const restartSession = async () => {
+    if (currentSession) {
+      setIsRestartingSession(true);
+      setIsSessionLoading(true);
+      setMessages([
+        {
+          id: Date.now(),
+          text: "Welcome to Claude! I'm here to help you with any questions or tasks you have.",
+          timestamp: new Date(),
+          role: "system",
+          contentType: "system",
+        },
+      ]);
+      setNewMessage("");
+      setTimer(0);
+      setIsSystemPromptOpen(false);
+      setIsMessageLoading(false);
+      setChatHistory([]);
+      releaseSession(currentSession.id);
+      const newSession = await createSession();
+      setCurrentSession(newSession);
+      setIsSessionLoading(false);
+      setIsRestartingSession(false);
+      return newSession;
+    }
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentSession?.id) {
+        releaseSession(currentSession.id);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      if (currentSession?.id) {
+        releaseSession(currentSession.id);
+      }
+    };
+  }, [currentSession]);
 
   return (
     <SessionContext.Provider
