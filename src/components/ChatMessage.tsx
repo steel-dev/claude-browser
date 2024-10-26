@@ -1,5 +1,7 @@
 import React from "react";
 import { ExtendedMessage } from "../types";
+import { useSession } from "../SessionContext/session.context";
+
 
 // Tool icons mapping (using placeholder images)
 const TOOL_ICONS: { [key: string]: string } = {
@@ -20,6 +22,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isTool = message.contentType === "tool_use";
   const isSystem = message.contentType === "system";
   const isError = message.contentType === "error";
+  const { restartSession } = useSession();
 
   // Base styles for all messages
   const baseMessageStyle = {
@@ -92,20 +95,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           >
             {message.text}
             {isError && (
-              <a
-                href="#"
+              <button
                 onClick={(e) => {
                   e.preventDefault();
                   window.location.reload();
+                  restartSession();
                 }}
                 style={{
                   color: "#d32f2f",
                   textDecoration: "underline",
                   marginLeft: "8px",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
                 }}
               >
                 Restart Session
-              </a>
+              </button>
             )}
           </span>
           <div

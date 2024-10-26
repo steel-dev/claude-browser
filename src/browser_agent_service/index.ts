@@ -91,7 +91,7 @@ function filterToNMostRecentImages(
 }
 
 export async function run(
-  input: { messages: any[]; id: string; systemPrompt?: string },
+  input: { messages: any[]; id: string; systemPrompt?: string; temperature?: number; numImagesToKeep?: number; waitTime?: number; apiKey?: string },
   onAgentOutput?: (data: any) => void
 ) {
   try {
@@ -106,7 +106,7 @@ export async function run(
     const image_truncation_threshold = 10;
 
     const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+      apiKey: input.apiKey,
     });
 
     let messages = input.messages;
@@ -164,8 +164,8 @@ export async function run(
     while (true) {
       const filteredMessages = filterToNMostRecentImages(
         messages,
-        image_truncation_threshold, // Keep 10 most recent images
-        image_truncation_threshold // Minimum removal threshold
+        input.numImagesToKeep || image_truncation_threshold, // Keep 10 most recent images
+        input.numImagesToKeep || image_truncation_threshold // Minimum removal threshold
       );
 
       // Prepare variables to collect streamed events
@@ -194,6 +194,7 @@ export async function run(
         tools: anthropicTools,
         stream: true,
         betas: ["computer-use-2024-10-22"],
+        temperature: input.temperature || 1.0,
       });
 
       // Process the streamed events

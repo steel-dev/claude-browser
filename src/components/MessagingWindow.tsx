@@ -52,6 +52,11 @@ const MessagingWindow: React.FC = () => {
     setTimer,
     isSystemPromptOpen,
     setIsSystemPromptOpen,
+    systemPrompt,
+    temperature,
+    apiKey,
+    numImagesToKeep,
+    waitTime,
   } = useSession();
 
   useEffect(() => {
@@ -106,6 +111,11 @@ const MessagingWindow: React.FC = () => {
           body: JSON.stringify({
             messages,
             id: currentSession?.id,
+            systemPrompt: systemPrompt,
+            temperature: temperature,
+            numImagesToKeep: numImagesToKeep,
+            waitTime: waitTime,
+            apiKey: apiKey,
           }),
         });
 
@@ -421,7 +431,7 @@ const MessagingWindow: React.FC = () => {
               cursor: "pointer",
             }}
             onClick={() => {
-              restartSession(currentSession?.id);
+              restartSession();
             }}
           >
             Restart Session

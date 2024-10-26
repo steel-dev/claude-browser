@@ -36,7 +36,6 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }
       setTempInput((sessionTemperature || 0.7).toString());
       setNumImagesToKeep(sessionNumImagesToKeep || 10);
       setWaitTime(Math.max(1, (sessionWaitTime || 1000) / 1000)); // Ensure minimum of 1 second
-      setClaudeAPIKey(sessionClaudeAPIKey || "");
     }
   }, [
     isOpen,
@@ -44,7 +43,6 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }
     sessionTemperature,
     sessionNumImagesToKeep,
     sessionWaitTime,
-    sessionClaudeAPIKey,
   ]);
 
   if (!isOpen) return null;
@@ -101,15 +99,20 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }
 
   // Save changes to session context when user clicks "Save"
   const handleSave = () => {
-
-    save({
+    const saveData: any = {
       prompt: localSystemPrompt,
       temperature: temperature,
       numImagesToKeep: numImagesToKeep,
       waitTime: waitTime,
-      apiKey: claudeAPIKey,
-    });
+      apiKey: claudeAPIKey || undefined,
+    };
+
+    // Only include API key if user entered a new one
+    
+
+    save(saveData);
     onClose();
+    setClaudeAPIKey("");
     restartSession();
   };
 

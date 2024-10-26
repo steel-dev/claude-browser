@@ -31,7 +31,7 @@ interface SessionContextProps {
   setNumImagesToKeep: React.Dispatch<React.SetStateAction<number>>;
   setWaitTime: React.Dispatch<React.SetStateAction<number>>;
   startSession: () => Promise<Record<string, any>>;
-  restartSession: (id: string) => Promise<Record<string, any>>;
+  restartSession: () => Promise<Record<string, any>>;
   setIsSessionLoading: (loading: boolean) => void; // renamed from setIsLoading
   setClaudeAPIKey: React.Dispatch<React.SetStateAction<string>>;
   setSystemPrompt: React.Dispatch<React.SetStateAction<string>>;
@@ -132,7 +132,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       setMessages([
         {
           id: Date.now(),
-          text: "Welcome to Claude! I'm here to help you with any questions or tasks you have.",
+          text: "Welcome, I'm Claude and I'll be your browsing assistant! I have full access to a browser and can help with all sorts of tasks you need.",
           timestamp: new Date(),
           role: "system",
           contentType: "system",
@@ -168,6 +168,26 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       }
     };
   }, [currentSession]);
+  const save = ({
+    prompt,
+    temperature,
+    numImagesToKeep,
+    waitTime, // in seconds
+    apiKey,
+  }: {
+    prompt: string;
+    temperature: number;
+    numImagesToKeep: number;
+    waitTime: number; // in seconds
+    apiKey: string;
+  }) => {
+    console.log("Saving system prompt", prompt);
+    if (prompt) setSystemPrompt(prompt);
+    if (temperature) setTemperature(temperature);
+    if (numImagesToKeep) setNumImagesToKeep(numImagesToKeep);
+    if (waitTime) setWaitTime(waitTime * 1000); // convert to milliseconds
+    if (apiKey) setClaudeAPIKey(apiKey);
+  };
 
   return (
     <SessionContext.Provider

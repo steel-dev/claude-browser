@@ -24,6 +24,10 @@ interface ChatRequest {
     messages: any[];
     id: string;
     systemPrompt?: string;
+    temperature?: number;
+    numImagesToKeep?: number;
+    waitTime?: number;
+    apiKey?: string;
   };
 }
 
@@ -157,7 +161,7 @@ fastify.post("/api/chat", {
     request: FastifyRequest<ChatRequest>,
     reply: FastifyReply
   ) => {
-    const { messages, id, systemPrompt } = request.body;
+    const { messages, id, systemPrompt, temperature, numImagesToKeep, waitTime, apiKey } = request.body;
     // Set headers for Server-Sent Events
     reply.raw.setHeader("Content-Type", "text/event-stream");
     reply.raw.setHeader("Cache-Control", "no-cache");
@@ -169,7 +173,7 @@ fastify.post("/api/chat", {
     };
 
     try {
-      await run({ messages, id, systemPrompt }, onAgentOutput);
+      await run({ messages, id, systemPrompt, temperature, numImagesToKeep, waitTime, apiKey }, onAgentOutput);
     } catch (error) {
       console.error("Error in AI agent:", error);
       reply.sse({ event: "error", data: "An error occurred" });
