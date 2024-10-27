@@ -10,6 +10,6 @@ export const env = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
   OPENAI_ORGANIZATION: process.env.OPENAI_ORGANIZATION || "",
   STEEL_API_KEY: process.env.STEEL_API_KEY || "",
-  WEBSOCKET_URL: process.env.WEBSOCKET_URL || "wss://connect.steel.dev",
+  WEBSOCKET_URL: process.env.WEBSOCKET_URL || "ws://connect.steel.dev",
   API_URL: process.env.API_URL || "https://api.steel.dev",
 };

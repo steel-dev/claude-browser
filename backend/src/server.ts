@@ -7,7 +7,8 @@ import { env } from "./env";
 import EventEmitter from "events";
 
 export const steel = new Steel({
-  steelAPIKey: process.env.STEEL_API_KEY,
+  steelAPIKey: env.STEEL_API_KEY,
+  baseURL: env.API_URL,
 });
 
 const fastify = Fastify({
@@ -65,6 +66,10 @@ fastify.get("/live-viewer/:id", {
     reply: FastifyReply
   ) => {
     const { id } = request.params;
+    console.log(
+      "WEBSOCKET URL",
+      `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
+    );
     const ws = new WebSocket(
       `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
     );
