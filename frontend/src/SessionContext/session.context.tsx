@@ -66,8 +66,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [isRestartingSession, setIsRestartingSession] =
     useState<boolean>(false);
   const [systemPrompt, setSystemPrompt] = useState<string>(
-    `
-You are a GODMODE browser assistant that can use tools to control a browser tab and execute all sorts tasks for a user.
+    `You are a GODMODE browser assistant that can use tools to control a browser tab and execute all sorts tasks for a user.
 
 <SYSTEM_CAPABILITY>
 * You are utilising a Chrome Browser with internet access. It is already open and running. You can only see the current page and some times the previous few pages. 
