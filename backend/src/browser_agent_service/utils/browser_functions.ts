@@ -49,6 +49,12 @@ export async function goToUrl({
   return { newPage: page, screenshot: screenshotBuffer };
 }
 
+// Tool that returns the current page's URL
+export const getCurrentUrl = async ({ page }: { page: Page }): Promise<{ newPage: Page; url: string }> => {
+  const url = page.url();
+  return { newPage: page, url };
+};
+
 export const saveToMemory = async ({
   page,
   information,

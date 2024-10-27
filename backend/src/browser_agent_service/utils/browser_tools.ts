@@ -4,7 +4,7 @@ import {
   BetaToolComputerUse20241022,
 } from "@anthropic-ai/sdk/resources/beta";
 
-import { goToUrl, saveToMemory, claudeComputerTool } from "./browser_functions";
+import { goToUrl, saveToMemory, claudeComputerTool, getCurrentUrl } from "./browser_functions";
 
 // Define the type for the handler function
 type ToolHandler = (input: any) => Promise<any>;
@@ -52,6 +52,16 @@ export const tools: Array<
     //cache_control: { type: 'ephemeral' },
     handler: claudeComputerTool,
   } as BetaToolComputerUse20241022 & { handler: ToolHandler },
+  {
+    name: "get_current_url",
+    description: "Returns the current page's URL.",
+    input_schema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+    handler: getCurrentUrl,
+  },
 ];
 
 // Prepare the tools to be sent to the Anthropic SDK (excluding handlers)
