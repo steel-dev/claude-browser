@@ -131,7 +131,28 @@ The current date is ${new Date().toLocaleDateString("en-US", {
 
   useEffect(() => {
     if (toolResult) {
-      setChatHistory((prev) => [...prev, toolResult]);
+      setChatHistory((prev) => {
+        if (
+          prev[prev.length - 1].role === "user" &&
+          prev[prev.length - 1].content.length > 0 &&
+          prev[prev.length - 1].content[
+            prev[prev.length - 1].content.length - 1
+          ].type === "tool_result"
+        ) {
+          return [
+            ...prev.slice(0, -1),
+            {
+              ...prev[prev.length - 1],
+              content: [
+                ...prev[prev.length - 1].content,
+                ...toolResult.content,
+              ],
+            },
+          ];
+        } else {
+          return [...prev, toolResult];
+        }
+      });
     }
   }, [toolResult]);
 
