@@ -271,6 +271,7 @@ export async function run(
             const result = await tool.handler({
               page,
               ...functionArguments,
+              waitTime: input.waitTime,
             });
             page = result.newPage;
 

@@ -25,9 +25,11 @@ function sleep(ms: number) {
 export async function goToUrl({
   page,
   url,
+  waitTime,
 }: {
   page: Page;
   url: string;
+  waitTime?: number;
 }): Promise<{ newPage: Page; screenshot?: string }> {
   try {
     await page.goto(url, { waitUntil: "domcontentloaded" });
@@ -42,7 +44,7 @@ export async function goToUrl({
     }
   }
   // Wait before taking the screenshot
-  await sleep(screenshotWaitTimeMs);
+  await sleep(waitTime || screenshotWaitTimeMs);
 
   const screenshotBuffer = await page.screenshot({ encoding: "base64" });
 
@@ -112,12 +114,14 @@ export async function claudeComputerTool({
   text,
   coordinate,
   page,
+  waitTime,
 }: {
   action: Action;
   text?: string;
   coordinate?: [number, number];
   page: Page;
   url: string;
+  waitTime?: number;
 }): Promise<{ newPage: Page; screenshot?: string }> {
   /**
    * Executes the specified action on the Puppeteer page.
@@ -251,7 +255,7 @@ export async function claudeComputerTool({
       }
 
       // Wait before taking the screenshot
-      await sleep(screenshotWaitTimeMs);
+      await sleep(waitTime || screenshotWaitTimeMs);
 
       const screenshotBuffer = await page.screenshot({ encoding: "base64" });
       const markedScreenshot = await drawCircleOnScreenshot(
@@ -300,7 +304,7 @@ export async function claudeComputerTool({
       }
 
       // Wait before taking the screenshot
-      await sleep(screenshotWaitTimeMs);
+      await sleep(waitTime || screenshotWaitTimeMs);
 
       const screenshotBuffer = await page.screenshot({ encoding: "base64" });
       return { newPage: page, screenshot: screenshotBuffer };
@@ -324,7 +328,7 @@ export async function claudeComputerTool({
 
       if (action === "screenshot") {
         // Wait before taking the screenshot
-        await sleep(screenshotWaitTimeMs);
+        await sleep(waitTime || screenshotWaitTimeMs);
 
         const screenshotBuffer = await page.screenshot({ encoding: "base64" });
         return { newPage: page, screenshot: screenshotBuffer };
@@ -361,7 +365,7 @@ export async function claudeComputerTool({
         await page.mouse.up({ button, ...clickOptions });
 
         // Wait before taking the screenshot
-        await sleep(screenshotWaitTimeMs);
+        await sleep(waitTime || screenshotWaitTimeMs);
 
         const screenshotBuffer = await page.screenshot({ encoding: "base64" });
         return { newPage: page, screenshot: screenshotBuffer };
