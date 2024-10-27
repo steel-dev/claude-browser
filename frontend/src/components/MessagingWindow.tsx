@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Window, Button } from "react-windows-xp";
 import { useSession } from "../SessionContext/session.context";
 import { ExtendedMessage } from "../types";
@@ -62,6 +62,8 @@ const MessagingWindow: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const [timerFlashing, setTimerFlashing] = useState(true);
 
   // Update messages when new SSE data is received
 
@@ -394,7 +396,15 @@ const MessagingWindow: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimer((prevTimer) => prevTimer + 1);
+      if (timer < 900) {
+        if (timerFlashing) {
+          setTimerFlashing(false);
+        }
+        setTimer((prevTimer) => prevTimer + 1);
+      } else if (timer === 900) {
+        setTimerFlashing(true);
+        // TODO: Add a warning message -- show some kind of warning that the session is about to end
+      }
     }, 1000);
 
     return () => clearInterval(interval);
@@ -549,9 +559,14 @@ const MessagingWindow: React.FC = () => {
           height: "30px",
         }}
       >
-        <span>
+        <span
+          style={{
+            color: timerFlashing ? "red" : "black",
+            animation: timerFlashing ? "blink 1s infinite" : "none",
+          }}
+        >
           Session duration: {Math.floor(timer / 60)}:
-          {(timer % 60).toString().padStart(2, "0")} / 30:00
+          {(timer % 60).toString().padStart(2, "0")} / 15:00
         </span>
       </div>
       <SystemPromptModal

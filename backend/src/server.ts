@@ -39,7 +39,7 @@ fastify.register(cors, {
 fastify.post("/new-session", {
   handler: async (request: FastifyRequest, reply: FastifyReply) => {
     const session = await steel.sessions.create({
-      sessionTimeout: 300000,
+      sessionTimeout: 900000,
     });
     reply.send(session);
   },
