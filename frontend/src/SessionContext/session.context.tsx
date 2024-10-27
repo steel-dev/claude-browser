@@ -114,7 +114,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   }, [chatHistory]);
 
   const releaseSession = async (id: string) => {
-    await fetch(`http://127.0.0.1:3001/release-session/${id}`);
+    await fetch(`${process.env.REACT_APP_API_URL}/release-session/${id}`);
   };
 
   const startSession = async () => {
