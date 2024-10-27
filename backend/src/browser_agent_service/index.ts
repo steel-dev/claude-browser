@@ -201,6 +201,8 @@ export async function run(
         temperature: input.temperature || 1.0,
       });
 
+      console.log("Model is responding");
+
       // Process the streamed events
       for await (const event of response) {
         output(event); // Send the entire event to the client
@@ -255,6 +257,7 @@ export async function run(
 
       // Append assistant's response to messages
       messages.push(assistantMessage);
+      console.log("PUSHED ASSISTANT MESSAGE");
 
       // Check for tool uses in the assistant's response
       const functionCalls = assistantMessage.content.filter(
@@ -264,6 +267,7 @@ export async function run(
       if (functionCalls.length > 0) {
         for (const functionCall of functionCalls) {
           const { name, input: functionArguments } = functionCall;
+          console.log("CALLING FUNCTION", name, functionArguments);
           const tool = tools.find((tool) => tool.name === name);
 
           if (tool) {
@@ -321,6 +325,7 @@ export async function run(
             console.error(`No tool found for function ${name}`);
           }
         }
+        console.log("DONE WITH FUNCTION CALLS");
       } else {
         // No function calls, assistant provided a final answer
         assistantMessage.content.forEach((block: any) => {
@@ -333,6 +338,7 @@ export async function run(
       }
     }
 
+    console.log("DISCONNECTING BROWSER");
     await browser.disconnect();
     // await releaseSession(input.id);
 
