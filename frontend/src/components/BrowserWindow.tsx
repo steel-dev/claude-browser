@@ -263,24 +263,53 @@ const BrowserWindow: React.FC = () => {
             borderTop: "1px solid #a0a0a0",
             display: "flex",
             alignItems: "center",
-            gap: "8px",
+            justifyContent: "space-between", // Added to separate left and right sections
+            height: "fit-content",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <img
-              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA8UlEQVR42pWSsQ2DMBBFrYiNbhZqqngFWlfs4G0YwHVWQKIKZZTC8b/kHHMYSCx9YYHf88dgTDH6vo/DMJzG7A0Izob3PrZtG48Fz/tuIMC1KtECYwOnFAAkohylcBkqYbIxLsvC8xACt8BmqoWLNj3waQHRO4ljicC4zvOcJYXApRtY7leVITHhKwGMTNONJVnA7x48V9WvICnhlQBwSLtTWiQCaSDVAWIOcNOg6zqub+jdABnHkcNnwVK/38A58zk0m4EyGq6eAcDL9RGbpuEAktTgjUAk8iPpz6bhqkC+huxYAho+FODBr6kKcPOfvACzZogqWb89XgAAAABJRU5ErkJggg=="
-              alt=""
-              style={{ width: "16px", height: "16px" }}
-            />
-            <span>Done</span>
+          {/* Left side icons */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <img
+                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA8UlEQVR42pWSsQ2DMBBFrYiNbhZqqngFWlfs4G0YwHVWQKIKZZTC8b/kHHMYSCx9YYHf88dgTDH6vo/DMJzG7A0Izob3PrZtG48Fz/tuIMC1KtECYwOnFAAkohylcBkqYbIxLsvC8xACt8BmqoWLNj3waQHRO4ljicC4zvOcJYXApRtY7leVITHhKwGMTNONJVnA7x48V9WvICnhlQBwSLtTWiQCaSDVAWIOcNOg6zqub+jdABnHkcNnwVK/38A58zk0m4EyGq6eAcDL9RGbpuEAktTgjUAk8iPpz6bhqkC+huxYAho+FODBr6kKcPOfvACzZogqWb89XgAAAABJRU5ErkJggg=="
+                alt=""
+                style={{ width: "16px", height: "16px" }}
+              />
+              <span>Done</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <img
+                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR42s2TQQ6AIAwE+/R9Gj9bLQLaUqskHixpSKwzmA2K/LYA0PcSqFVKoejCpSURKTigvgzMJriR1M/sL/MCGVh3YQzXId2JtPCYOYkRTH3MTCZrgiDQUDACczJEgfoc9ofzKS6TVNAkVgDbKdwFSATnHchuJZ5Avv0dGPT3tQGt6vGOoDIgSwAAAABJRU5ErkJggg=="
+                alt=""
+                style={{ width: "16px", height: "16px" }}
+              />
+              <span>Internet</span>
+            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <img
-              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR42s2TQQ6AIAwE+/R9Gj9bLQLaUqskHixpSKwzmA2K/LYA0PcSqFVKoejCpSURKTigvgzMJriR1M/sL/MCGVh3YQzXId2JtPCYOYkRTH3MTCZrgiDQUDACczJEgfoc9ofzKS6TVNAkVgDbKdwFSATnHchuJZ5Avv0dGPT3tQGt6vGOoDIgSwAAAABJRU5ErkJggg=="
-              alt=""
-              style={{ width: "16px", height: "16px" }}
-            />
-            <span>Internet</span>
+
+          {/* Right side icons (duplicate of left side) */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <span>
+                Powered by <a href="https://steel.dev">steel.dev</a> and{" "}
+                <a href="https://anthropic.com">Anthropic</a>
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <span>|</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
+                alt=""
+                style={{ width: "12px", height: "12px" }}
+              />
+              <span>
+                <a href="https://github.com/steel-dev/claude-browser">
+                  Github
+                </a>
+              </span>
+            </div>
           </div>
         </div>
       </div>
