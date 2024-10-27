@@ -1,5 +1,5 @@
 {
-  "name": "claude-browser-app",
+  "name": "claude-browser-backend",
   "version": "0.1.0",
   "private": true,
   "engines": {
