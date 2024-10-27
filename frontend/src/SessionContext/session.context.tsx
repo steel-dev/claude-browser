@@ -156,9 +156,9 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = async () => {
       if (currentSession?.id) {
-        releaseSession(currentSession.id);
+        await releaseSession(currentSession.id);
       }
     };
 
@@ -166,9 +166,6 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      if (currentSession?.id) {
-        releaseSession(currentSession.id);
-      }
     };
   }, [currentSession]);
   const save = ({
