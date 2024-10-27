@@ -14,7 +14,7 @@ export async function releaseSession(sessionId: string) {
 
   try {
     const response = await fetch(
-      `https://steel-api-staging.fly.dev/v1/sessions/${sessionId}/release`,
+      `${env.API_URL}/v1/sessions/${sessionId}/release`,
       {
         method: "POST",
         headers: {
@@ -137,7 +137,7 @@ export async function run(
     // openBrowser();
 
     const browser = await puppeteer.connect({
-      browserWSEndpoint: `ws://steel-api-staging.fly.dev?apiKey=${env.STEEL_API_KEY}&sessionId=${input.id}`,
+      browserWSEndpoint: `${env.WEBSOCKET_URL}?apiKey=${env.STEEL_API_KEY}&sessionId=${input.id}`,
     });
 
     let pages = await browser.pages();

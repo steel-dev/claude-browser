@@ -8,7 +8,6 @@ import EventEmitter from "events";
 
 export const steel = new Steel({
   steelAPIKey: process.env.STEEL_API_KEY,
-  baseURL: "https://steel-api-staging.fly.dev",
 });
 
 const fastify = Fastify({
@@ -67,7 +66,7 @@ fastify.get("/live-viewer/:id", {
   ) => {
     const { id } = request.params;
     const ws = new WebSocket(
-      `ws://steel-api-staging.fly.dev/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
+      `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
     );
 
     const headers = {
