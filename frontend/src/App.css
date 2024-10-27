@@ -47,13 +47,20 @@
 }
 
 .browser-window {
-  flex: 0 0 67%;
+  flex: 2;
   height: 100%;
   order: 1; /* Place browser on the right on desktop */
 }
 
+.browser-window-canvas {
+  min-width: 400px;
+  min-height: 300px;
+  object-fit: contain;
+  max-height: calc(100vh - 100px);
+}
+
 .messaging-window {
-  flex: 0 0 33%;
+  flex: 1;
   height: 100%;
   order: 0; /* Place chat on the left on desktop */
 }
@@ -67,8 +74,13 @@
 
   .browser-window,
   .messaging-window {
-    flex: 0 0 50%;
-    height: 50%;
+    flex: 1;
+    max-height: 50%;
     order: 0; /* Reset order on mobile */
+  }
+
+  .browser-window-canvas {
+    min-width: none;
+    min-height: none;
   }
 }

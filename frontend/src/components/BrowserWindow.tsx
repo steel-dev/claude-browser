@@ -252,12 +252,7 @@ const BrowserWindow: React.FC = () => {
             ref={canvasRef}
             width={canvasSize?.width}
             height={canvasSize?.height}
-            style={{
-              minWidth: "400px",
-              minHeight: "300px",
-              objectFit: "contain",
-              maxHeight: "calc(100vh - 100px)",
-            }}
+            className="browser-window-canvas"
           />
         </div>
 

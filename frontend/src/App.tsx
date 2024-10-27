@@ -4,6 +4,7 @@ import MessagingWindow from "./components/MessagingWindow.tsx";
 import { Wallpaper, Window, Button, TextBox } from "react-windows-xp";
 import { useSession } from "./SessionContext/session.context";
 import LoadingModal from "./components/LoadingModal";
+import "./App.css";
 
 const App: React.FC = () => {
   const { currentSession, startSession, setClaudeAPIKey, isSessionLoading } =
@@ -50,9 +51,13 @@ const App: React.FC = () => {
                   <b>Welcome to the Claude Browser Assistant!</b>
                 </p>
                 <p>
-                  This is a demo app of Anthropic's new <a href="https://x.com/AnthropicAI/status/1848742752403476488">Computer Use model API</a>
-                  (upgraded claude 3.5 sonnet) refactored to control a browser in the cloud.
-                  Powered by <a href="https://steel.dev">steel.dev</a>.
+                  This is a demo app of Anthropic's new{" "}
+                  <a href="https://x.com/AnthropicAI/status/1848742752403476488">
+                    Computer Use model API
+                  </a>
+                  (upgraded claude 3.5 sonnet) refactored to control a browser
+                  in the cloud. Powered by{" "}
+                  <a href="https://steel.dev">steel.dev</a>.
                 </p>
                 <p>
                   Give it a try and let claude be your AI browsing assistant,
@@ -76,7 +81,13 @@ const App: React.FC = () => {
                     agents.
                   </p>
                 </div>
-                <div style={{ display: "inline-block", padding: "10px", textAlign: "right" }}>
+                <div
+                  style={{
+                    display: "inline-block",
+                    padding: "10px",
+                    textAlign: "right",
+                  }}
+                >
                   <a
                     href="https://tally.so/r/mZR6ZB"
                     style={{
@@ -127,20 +138,11 @@ const App: React.FC = () => {
   return (
     <Wallpaper fullScreen>
       <LoadingModal isOpen={isSessionLoading} />
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          padding: "20px",
-          height: "calc(100vh - 40px)",
-          gap: "20px",
-          overflowY: "hidden",
-        }}
-      >
-        <div style={{ gridColumn: "span 1", overflowY: "hidden" }}>
+      <div className="app-container">
+        <div className="messaging-window">
           <MessagingWindow />
         </div>
-        <div style={{ gridColumn: "span 2", overflowY: "hidden" }}>
+        <div className="browser-window">
           <BrowserWindow />
         </div>
       </div>
