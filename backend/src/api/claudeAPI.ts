@@ -9,29 +9,28 @@ export const streamMessage = async (
   messageContent: string,
   onContentBlock: (content: string) => void
 ) => {
-  const response = await fetch('http://127.0.0.1:3001/api/chat', {
-    method: 'POST',
+  const response = await fetch(`${process.env.REACT_APP_API_URL}/api/chat`, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query: messageContent })
+    body: JSON.stringify({ query: messageContent }),
   });
-  
 
-  if (!response.body) throw new Error('No response body');
+  if (!response.body) throw new Error("No response body");
 
   const reader = response.body.getReader();
-  const decoder = new TextDecoder('utf-8');
+  const decoder = new TextDecoder("utf-8");
 
-  let buffer = '';
+  let buffer = "";
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
-    let lines = buffer.split('\n');
-    buffer = lines.pop() || '';
+    let lines = buffer.split("\n");
+    buffer = lines.pop() || "";
     for (let line of lines) {
-      if (line.startsWith('data: ')) {
+      if (line.startsWith("data: ")) {
         const data = JSON.parse(line.slice(6));
         onContentBlock(data);
       }

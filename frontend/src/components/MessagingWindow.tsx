@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Window, Button } from "react-windows-xp";
 import { useSession } from "../SessionContext/session.context";
 import { ExtendedMessage } from "../types";
@@ -103,21 +103,24 @@ const MessagingWindow: React.FC = () => {
       setIsMessageLoading(true);
 
       try {
-        const response = await fetch("http://127.0.0.1:3001/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messages,
-            id: currentSession?.id,
-            systemPrompt: systemPrompt,
-            temperature: temperature,
-            numImagesToKeep: numImagesToKeep,
-            waitTime: waitTime,
-            apiKey: apiKey,
-          }),
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/api/chat`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messages,
+              id: currentSession?.id,
+              systemPrompt: systemPrompt,
+              temperature: temperature,
+              numImagesToKeep: numImagesToKeep,
+              waitTime: waitTime,
+              apiKey: apiKey,
+            }),
+          }
+        );
 
         const reader = response.body!.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -395,7 +398,7 @@ const MessagingWindow: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [setTimer]);
 
   // Adjusted rendering logic
   return (

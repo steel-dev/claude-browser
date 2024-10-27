@@ -2,7 +2,6 @@ import { Page, KeyInput } from "puppeteer";
 import sharp from "sharp";
 import fs from "fs";
 import path from "path";
-import { getAdjustedCoordinates } from "./helpers";
 import { errorImage } from "./consts";
 
 // Global wait time in milliseconds before taking a screenshot

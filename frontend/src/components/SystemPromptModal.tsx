@@ -7,13 +7,15 @@ interface SystemPromptModalProps {
   onClose: () => void;
 }
 
-const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }) => {
+const SystemPromptModal: React.FC<SystemPromptModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const {
     systemPrompt: sessionSystemPrompt,
     temperature: sessionTemperature,
     numImagesToKeep: sessionNumImagesToKeep,
     waitTime: sessionWaitTime,
-    apiKey: sessionClaudeAPIKey,
     save,
     restartSession,
   } = useSession();
@@ -93,7 +95,9 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }
     setClaudeAPIKey(value);
   };
 
-  const handleLocalSystemPromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleLocalSystemPromptChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setLocalSystemPrompt(e.target.value);
   };
 
@@ -108,7 +112,6 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }
     };
 
     // Only include API key if user entered a new one
-    
 
     save(saveData);
     onClose();
@@ -159,7 +162,8 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }
             }}
           />
           <p style={{ marginBottom: "8px" }}>
-            Note: We automatically append the current datetime + memory to the bottom of the system prompt.
+            Note: We automatically append the current datetime + memory to the
+            bottom of the system prompt.
           </p>
 
           {/* Form Fields */}
@@ -210,7 +214,9 @@ const SystemPromptModal: React.FC<SystemPromptModalProps> = ({ isOpen, onClose }
             }}
           >
             <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave}>Save Changes and Restart Session</Button>
+            <Button onClick={handleSave}>
+              Save Changes and Restart Session
+            </Button>
           </div>
         </div>
       </Window>

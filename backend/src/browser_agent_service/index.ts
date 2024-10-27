@@ -75,7 +75,7 @@ function filterToNMostRecentImages(
 
   toolResultBlocks.forEach((toolResult) => {
     if (Array.isArray(toolResult?.content)) {
-      const newContent = [];
+      const newContent: any[] = [];
       for (const content of toolResult.content) {
         if (content?.type === "image" && imagesToRemove > 0) {
           imagesToRemove--;
@@ -91,7 +91,15 @@ function filterToNMostRecentImages(
 }
 
 export async function run(
-  input: { messages: any[]; id: string; systemPrompt?: string; temperature?: number; numImagesToKeep?: number; waitTime?: number; apiKey?: string },
+  input: {
+    messages: any[];
+    id: string;
+    systemPrompt?: string;
+    temperature?: number;
+    numImagesToKeep?: number;
+    waitTime?: number;
+    apiKey?: string;
+  },
   onAgentOutput?: (data: any) => void
 ) {
   try {
@@ -127,10 +135,6 @@ export async function run(
     // };
 
     // openBrowser();
-
-    const computerTool = tools.find(
-      (tool) => tool.name === "computer"
-    )!.handler;
 
     const browser = await puppeteer.connect({
       browserWSEndpoint: `ws://steel-api-staging.fly.dev?apiKey=${env.STEEL_API_KEY}&sessionId=${input.id}`,

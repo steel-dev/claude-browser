@@ -1,19 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Window, TextBox } from "react-windows-xp";
+import { Window } from "react-windows-xp";
 import { useSession } from "../SessionContext/session.context";
 import { useSSE } from "../hooks/useSSE";
-// import rrwebPlayer from "rrweb-player";
-// import "rrweb-player/dist/style.css";
 
 const BrowserWindow: React.FC = () => {
-  // const { time, error } = useTime();
   const { currentSession, isRestartingSession } = useSession();
   const [url, setUrl] = useState("about:blank");
   const frame = useSSE(
-    `http://127.0.0.1:3001/live-viewer/${currentSession?.id}`
+    `${process.env.REACT_APP_API_URL}/live-viewer/${currentSession?.id}`
   );
 
-  const event = useSSE(`http://127.0.0.1:3001/events/${currentSession?.id}`);
+  const event = useSSE(
+    `${process.env.REACT_APP_API_URL}/events/${currentSession?.id}`
+  );
   const [events] = useState<any[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -30,9 +29,9 @@ const BrowserWindow: React.FC = () => {
       const img = new Image();
       img.onload = () => {
         const parentWidth = parentRef.current?.clientWidth || 0;
-        const scale = parentWidth / img.width;
+        // const scale = parentWidth / img.width;
         const aspectRatio = 16 / 9;
-        const scaledHeight = img.height / scale;
+        // const scaledHeight = img.height / scale;
         const targetHeight = parentWidth / aspectRatio;
         setCanvasSize({
           width: parentWidth,

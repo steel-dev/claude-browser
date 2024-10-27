@@ -88,15 +88,18 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [isSystemPromptOpen, setIsSystemPromptOpen] = useState(false);
 
   const createSession = async () => {
-    const newSession = await fetch("http://127.0.0.1:3001/new-session", {
-      method: "POST",
-    });
+    const newSession = await fetch(
+      `${process.env.REACT_APP_API_URL}/new-session`,
+      {
+        method: "POST",
+      }
+    );
     return newSession.json();
   };
 
   const toolResult = useSSE(
     currentSession
-      ? `http://127.0.0.1:3001/tool-results/${currentSession?.id}`
+      ? `${process.env.REACT_APP_API_URL}/tool-results/${currentSession?.id}`
       : null
   );
 

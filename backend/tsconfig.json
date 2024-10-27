@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "sourceMap": true,
+    "outDir": "dist",
+
+    /* Strictness */
+    "strict": true,
+    "checkJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+
+    /* Bundled projects */
+    "lib": ["dom", "dom.iterable", "ES2022"],
+    "noEmit": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "jsx": "preserve",
+    "plugins": [{ "name": "next" }],
+    "incremental": true,
+
+    /* Path Aliases */
+    "baseUrl": ".",},
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
