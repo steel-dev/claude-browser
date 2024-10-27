@@ -189,7 +189,6 @@ export async function run(
       //     console.log("CONTENT TYPE", content.type);
       //   }
       // }
-      console.log("MESSAGES LENGTH", filteredMessages.length);
       const response = await anthropic.beta.messages.create({
         model: "claude-3-5-sonnet-20241022",
         max_tokens: 4096,
@@ -309,10 +308,20 @@ export async function run(
             }
 
             // Append tool result to messages
-            messages.push({
-              role: "user",
-              content: [toolResult],
-            });
+            if (
+              messages[messages.length - 1].role === "user" &&
+              messages[messages.length - 1].content.length > 0 &&
+              messages[messages.length - 1].content[
+                messages[messages.length - 1].content.length - 1
+              ].type === "tool_result"
+            ) {
+              messages[messages.length - 1].content.push(toolResult);
+            } else {
+              messages.push({
+                role: "user",
+                content: [toolResult],
+              });
+            }
 
             messenger.emit("tool-result", {
               id: input.id,

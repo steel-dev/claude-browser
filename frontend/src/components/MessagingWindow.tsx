@@ -63,7 +63,7 @@ const MessagingWindow: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const [timerFlashing, setTimerFlashing] = useState(true);
+  const [timerFlashing, setTimerFlashing] = useState(false);
 
   // Update messages when new SSE data is received
 

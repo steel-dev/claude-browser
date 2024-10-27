@@ -215,6 +215,7 @@ const BrowserWindow: React.FC = () => {
             <input
               type="text"
               value={url}
+              readOnly
               style={{ flex: "1 1 0%", border: "none", outline: "none" }}
             />
           </div>
