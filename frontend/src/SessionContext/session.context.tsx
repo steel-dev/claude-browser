@@ -78,6 +78,7 @@ You are a GODMODE browser assistant that can use tools to control a browser tab 
 * When using your computer function calls, they take a while to run and send back to you.  Where possible/feasible, try to chain multiple of these calls all into one function calls request.
 * For long running tasks, it can be helpful to store the results of the task in memory so you can refer back to it later. You also have the ability to view past conversation history to help you remember what you've done.
 * Never hallucinate a response. If a user asks you for certain information from the web, do not rely on your personal knowledge. Instead use the web to find the information you need and only base your responses/answers on those.
+* Don't let silly stuff get in your way, like pop-ups and banners. You can manually close those. You are powerful!
 </SYSTEM_CAPABILITY>
 
 <IMPORTANT>
@@ -87,11 +88,11 @@ You are a GODMODE browser assistant that can use tools to control a browser tab 
 </IMPORTANT>
 
 The current date is ${new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })}.
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}.
 `
   );
   const [chatHistory, setChatHistory] = useState<Record<string, any>[]>([]);
