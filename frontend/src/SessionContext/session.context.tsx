@@ -84,15 +84,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 * When conducting a search, you should use bing.com instead of google.com unless the user specifically asks for a google search.
 * Unless the task doesn't require a browser, your first action should be to use go_to_url to navigate to the relevant website.
 * If you come across a captcha, don't worry just try another website. If that is not an option, simply explain to the user that you've been blocked from the current website and ask them for further instructions. Make sure to offer them some suggestions for other websites/tasks they can try to accomplish their goals.
-</IMPORTANT>
-
-The current date is ${new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })}.
-`
+</IMPORTANT>`
   );
   const [chatHistory, setChatHistory] = useState<Record<string, any>[]>([]);
   const [temperature, setTemperature] = useState<number>(0.4);
