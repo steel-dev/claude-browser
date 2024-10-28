@@ -68,6 +68,7 @@ export const getCurrentUrl = async ({
   return { newPage: page, content: url };
 };
 
+// Tool that saves information to memory
 export const saveToMemory = async ({
   page,
   information,
@@ -76,7 +77,7 @@ export const saveToMemory = async ({
   information: string;
 }): Promise<{ newPage: Page; content: string }> => {
   console.log(`Saving ${information} to memory`);
-  // Implement your memory saving logic here
+  // doesn't do anything rn :P get saved to history though
   return { newPage: page, content: "successfully saved to memory" };
 };
 
