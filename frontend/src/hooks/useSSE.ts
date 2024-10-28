@@ -5,7 +5,7 @@ export const useSSE = (url: string | null) => {
 
   useEffect(() => {
     if (!url) return;
-    const eventSource = new EventSource(url);
+    let eventSource = new EventSource(url);
 
     eventSource.onmessage = (event) => {
       setData(JSON.parse(event.data));
@@ -14,6 +14,7 @@ export const useSSE = (url: string | null) => {
     eventSource.onerror = (error) => {
       console.error("SSE error:", error);
       eventSource.close();
+      eventSource = new EventSource(url);
     };
 
     return () => {

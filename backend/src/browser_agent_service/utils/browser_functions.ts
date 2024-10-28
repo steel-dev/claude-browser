@@ -3,7 +3,7 @@ import sharp from "sharp";
 import fs from "fs";
 import path from "path";
 import { errorImage } from "./consts";
-import { messenger } from "src/server";
+import { messenger } from "../../server";
 
 // Global wait time in milliseconds before taking a screenshot
 const screenshotWaitTimeMs = 1000; // Adjust this value as needed
