@@ -177,7 +177,6 @@ export async function run(
         day: "numeric",
       })}.`;
 
-      
     while (true) {
       console.log("FILTERING MESSAGES");
       const filteredMessages = filterToNMostRecentImages(
@@ -267,6 +266,11 @@ export async function run(
           ) {
             //console.log("PARSING JSON", currentContentBlock.input);
             currentContentBlock.input = JSON.parse(currentContentBlock.input);
+          } else if (
+            currentContentBlock.type === "tool_use" &&
+            currentContentBlock.input === ""
+          ) {
+            currentContentBlock.input = {};
           }
           assistantMessage.content.push(currentContentBlock);
           currentContentBlock = null;
