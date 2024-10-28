@@ -185,6 +185,7 @@ fastify.post("/api/chat", {
     };
 
     try {
+      console.log("RUNNING AGENT");
       await run(
         {
           messages,
