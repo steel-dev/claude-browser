@@ -401,8 +401,11 @@ const MessagingWindow: React.FC = () => {
           setTimerFlashing(false);
         }
         setTimer((prevTimer) => prevTimer + 1);
-      } else if (timer === 900) {
+      } else if (timer >= 900) {
         setTimerFlashing(true);
+        if (timer > 900) {
+          setTimer(900);
+        }
         // TODO: Add a warning message -- show some kind of warning that the session is about to end
       }
     }, 1000);
