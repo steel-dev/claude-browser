@@ -1,6 +1,7 @@
 import { releaseSession, run } from "./browser_agent_service/index";
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import cors from "@fastify/cors";
+import fastifyWebsocket from "@fastify/websocket";
 import { FastifySSEPlugin } from "fastify-sse-v2";
 import Steel from "steel-sdk";
 import { env } from "./env";
@@ -30,7 +31,9 @@ interface ChatRequest {
     apiKey?: string;
   };
 }
-
+fastify.register(fastifyWebsocket, {
+  options: { maxPayload: 104857600 },
+});
 fastify.register(FastifySSEPlugin);
 fastify.register(cors, {
   allowedHeaders: "*",
@@ -60,46 +63,42 @@ fastify.get("/release-session/:id", {
   },
 });
 
-fastify.get("/live-viewer/:id", {
-  handler: async (
-    request: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply
-  ) => {
-    const { id } = request.params;
-    console.log(
-      "WEBSOCKET URL",
-      `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
-    );
-    const ws = new WebSocket(
-      `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
-    );
+fastify.register(async function (fastify) {
+  fastify.get(
+    "/live-viewer/:id",
+    { websocket: true },
+    async (
+      socket: any,
+      request: FastifyRequest<{ Params: { id: string } }>
+    ) => {
+      const { id } = request.params; // <-- This is the correct way to get the id
+      console.log(
+        "WEBSOCKET URL",
+        `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
+      );
+      const ws = new WebSocket(
+        `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`
+      );
 
-    const headers = {
-      "Content-Type": "text/event-stream",
-      Connection: "keep-alive",
-      "Cache-Control": "no-cache",
-      "Access-Control-Allow-Origin": "*",
-    };
-    reply.raw.writeHead(200, headers);
+      ws.onopen = () => {
+        console.log("WebSocket opened");
+        socket.send(JSON.stringify({ type: "open" }));
+      };
 
-    ws.onopen = () => {
-      console.log("WebSocket opened");
-      reply.sse({ data: JSON.stringify({ type: "open" }) });
-    };
+      ws.onmessage = (message) => {
+        const events = JSON.parse(message.data);
+        events.forEach((event: any) => {
+          socket.send(JSON.stringify(event));
+        });
+      };
 
-    ws.onmessage = (message) => {
-      const events = JSON.parse(message.data);
-      events.forEach((event: any) => {
-        reply.sse({ data: JSON.stringify(event) });
-      });
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket closed");
-      reply.sse({ data: JSON.stringify({ type: "close" }) });
-      reply.sseContext.source.end();
-    };
-  },
+      ws.onclose = () => {
+        console.log("WebSocket closed");
+        socket.send(JSON.stringify({ type: "close" }));
+        socket.close();
+      };
+    }
+  );
 });
 
 fastify.get("/events/:id", {

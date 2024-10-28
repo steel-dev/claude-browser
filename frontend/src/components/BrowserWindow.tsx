@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { Window } from "react-windows-xp";
 import { useSession } from "../SessionContext/session.context";
 import { useSSE } from "../hooks/useSSE";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 const BrowserWindow: React.FC = () => {
   const { currentSession, isRestartingSession } = useSession();
   const [url, setUrl] = useState("about:blank");
-  const frame = useSSE(
+  const frame = useWebSocket(
     `${process.env.REACT_APP_API_URL}/live-viewer/${currentSession?.id}`
   );
 
@@ -306,9 +307,7 @@ const BrowserWindow: React.FC = () => {
                 style={{ width: "12px", height: "12px" }}
               />
               <span>
-                <a href="https://github.com/steel-dev/claude-browser">
-                  Github
-                </a>
+                <a href="https://github.com/steel-dev/claude-browser">Github</a>
               </span>
             </div>
           </div>

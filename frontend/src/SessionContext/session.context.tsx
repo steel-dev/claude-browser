@@ -123,6 +123,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (toolResult) {
+      // console.log(
+      //   `Tool result ${toolResult.id} received at`,
+      //   new Date().toISOString()
+      // );
       setChatHistory((prev) => {
         if (
           prev[prev.length - 1].role === "user" &&
@@ -149,7 +153,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   }, [toolResult]);
 
   useEffect(() => {
-    console.log(chatHistory);
+    // console.log(chatHistory);
   }, [chatHistory]);
 
   const releaseSession = async (id: string) => {
