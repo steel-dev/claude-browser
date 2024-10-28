@@ -63,9 +63,9 @@ export const getCurrentUrl = async ({
   page,
 }: {
   page: Page;
-}): Promise<{ newPage: Page; url: string }> => {
+}): Promise<{ newPage: Page; content: string }> => {
   const url = page.url();
-  return { newPage: page, url };
+  return { newPage: page, content: url };
 };
 
 export const saveToMemory = async ({
