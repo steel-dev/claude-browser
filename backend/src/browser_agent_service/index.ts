@@ -192,16 +192,29 @@ export async function run(
       //     console.log("CONTENT TYPE", content.type);
       //   }
       // }
-      const response = await anthropic.beta.messages.create({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 4096,
-        messages: filteredMessages,
-        system: systemPrompt,
-        tools: anthropicTools,
-        stream: true,
-        betas: ["computer-use-2024-10-22"],
-        temperature: input.temperature || 1.0,
-      });
+      let response: any;
+      try {
+        response = await anthropic.beta.messages.create({
+          model: "claude-3-5-sonnet-20241022",
+          max_tokens: 4096,
+          messages: filteredMessages,
+          system: systemPrompt,
+          tools: anthropicTools,
+          stream: true,
+          betas: ["computer-use-2024-10-22"],
+          temperature: input.temperature || 1.0,
+        });
+      } catch (error) {
+        console.error("Error making model call:", error);
+        for (const message of filteredMessages) {
+          console.log("MESSAGE ROLE", message.role);
+          console.log("MESSAGE CONTENT LENGTH", message.content.length);
+          for (const content of message.content) {
+            console.log(">> CONTENT TYPE", content.type);
+          }
+        }
+        throw error;
+      }
 
       console.log("Model is responding");
 
