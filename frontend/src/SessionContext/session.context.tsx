@@ -95,7 +95,7 @@ The current date is ${new Date().toLocaleDateString("en-US", {
 `
   );
   const [chatHistory, setChatHistory] = useState<Record<string, any>[]>([]);
-  const [temperature, setTemperature] = useState<number>(1.0);
+  const [temperature, setTemperature] = useState<number>(0.4);
   const [numImagesToKeep, setNumImagesToKeep] = useState<number>(10);
   const [waitTime, setWaitTime] = useState<number>(1);
   const [messages, setMessages] = useState<ExtendedMessage[]>(() => [
