@@ -291,6 +291,7 @@ export async function run(
               page,
               ...functionArguments,
               waitTime: input.waitTime,
+              id: input.id,
             });
             page = result.newPage;
 

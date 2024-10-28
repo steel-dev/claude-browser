@@ -3,6 +3,7 @@ import sharp from "sharp";
 import fs from "fs";
 import path from "path";
 import { errorImage } from "./consts";
+import { messenger } from "src/server";
 
 // Global wait time in milliseconds before taking a screenshot
 const screenshotWaitTimeMs = 1000; // Adjust this value as needed
@@ -26,12 +27,18 @@ export async function goToUrl({
   page,
   url,
   waitTime,
+  id,
 }: {
   page: Page;
   url: string;
+  id: string;
   waitTime?: number;
 }): Promise<{ newPage: Page; screenshot?: string }> {
   try {
+    messenger.emit("url-changed", {
+      id,
+      url: page.url(),
+    });
     await page.goto(url, { waitUntil: "domcontentloaded" });
   } catch (error) {
     if (`${error}`.includes("Navigation timeout")) {
@@ -52,7 +59,11 @@ export async function goToUrl({
 }
 
 // Tool that returns the current page's URL
-export const getCurrentUrl = async ({ page }: { page: Page }): Promise<{ newPage: Page; url: string }> => {
+export const getCurrentUrl = async ({
+  page,
+}: {
+  page: Page;
+}): Promise<{ newPage: Page; url: string }> => {
   const url = page.url();
   return { newPage: page, url };
 };
