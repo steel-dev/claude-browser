@@ -21,7 +21,7 @@ npm run dev
 ### Run the development server (for the frontend):
 
 ```bash
-npm run dev
+npm run start
 ```
 
 ## Run the production server
