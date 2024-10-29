@@ -124,6 +124,10 @@ const MessagingWindow: React.FC = () => {
           }
         );
 
+        if (!response.ok) {
+          throw new Error((await response.json()).message);
+        }
+
         const reader = response.body!.getReader();
         const decoder = new TextDecoder("utf-8");
         let buffer = "";
