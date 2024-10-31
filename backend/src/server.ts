@@ -199,7 +199,7 @@ fastify.post("/api/chat", {
       );
     } catch (error) {
       console.error("Error in AI agent:", error);
-      reply.sse({ event: "error", data: "An error occurred" });
+      reply.sse({ event: "error", data: JSON.stringify({ error }) });
     } finally {
       reply.sseContext.source.end();
     }

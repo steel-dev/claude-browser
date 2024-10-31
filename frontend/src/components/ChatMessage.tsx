@@ -2,7 +2,6 @@ import React from "react";
 import { ExtendedMessage } from "../types";
 import { useSession } from "../SessionContext/session.context";
 
-
 // Tool icons mapping (using placeholder images)
 const TOOL_ICONS: { [key: string]: string } = {
   go_to_url:
@@ -22,7 +21,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isTool = message.contentType === "tool_use";
   const isSystem = message.contentType === "system";
   const isError = message.contentType === "error";
-  const { restartSession } = useSession();
+  const { restartSession, setIsSystemPromptOpen } = useSession();
 
   // Base styles for all messages
   const baseMessageStyle = {
@@ -93,27 +92,48 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               verticalAlign: "middle",
             }}
           >
-            {message.text}
-            {isError && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.reload();
-                  restartSession();
-                }}
-                style={{
-                  color: "#d32f2f",
-                  textDecoration: "underline",
-                  marginLeft: "8px",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                }}
-              >
-                Restart Session
-              </button>
-            )}
+            {message.text.includes("invalid x-api-key")
+              ? "Invalid Anthropic API key"
+              : message.text}
+            {isError &&
+              (message.text.includes("invalid x-api-key") ? (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsSystemPromptOpen(true);
+                  }}
+                  style={{
+                    color: "#d32f2f",
+                    textDecoration: "underline",
+                    marginLeft: "8px",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
+                >
+                  Change API Key
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.reload();
+                    restartSession();
+                  }}
+                  style={{
+                    color: "#d32f2f",
+                    textDecoration: "underline",
+                    marginLeft: "8px",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
+                >
+                  Restart Session
+                </button>
+              ))}
           </span>
           <div
             style={{

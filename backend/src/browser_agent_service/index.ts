@@ -223,7 +223,12 @@ export async function run(
             console.log(">> CONTENT TYPE", content.type);
           }
         }
-        throw error;
+        const errorObj = (error as Error).message.slice(
+          (error as Error).message.indexOf("{"),
+          (error as Error).message.lastIndexOf("}") + 1
+        );
+        console.log("ERROR MESSAGE", errorObj);
+        throw `Anthropic Error: ${JSON.parse(errorObj).error.message}`;
       }
 
       console.log("Model is responding");
@@ -385,12 +390,8 @@ export async function run(
 
     return;
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(`An error occurred: ${error.message}`);
-    } else {
-      console.error(error);
-      console.error("An unknown error occurred");
-    }
+    console.error("Error in AI agent:", error);
+    throw error;
   }
 }
 

@@ -125,7 +125,9 @@ const MessagingWindow: React.FC = () => {
         );
 
         if (!response.ok) {
-          throw new Error((await response.json()).message);
+          throw new Error(
+            "An error occurred while processing your request -- please try again. If the issue persists, please contact team@steel.dev"
+          );
         }
 
         const reader = response.body!.getReader();
@@ -163,7 +165,7 @@ const MessagingWindow: React.FC = () => {
           ...prev,
           {
             id: Date.now(),
-            text: "An error occurred while processing your request. Please try again.",
+            text: `${error.message}`,
             timestamp: new Date(),
             role: "error",
             contentType: "error",
@@ -375,6 +377,19 @@ const MessagingWindow: React.FC = () => {
         );
         break;
 
+      case "error":
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            text: `${data.error}`,
+            timestamp: new Date(),
+            role: "error",
+            contentType: "error",
+          },
+        ]);
+        break;
+
       default:
         break;
     }
@@ -415,7 +430,7 @@ const MessagingWindow: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [setTimer]);
+  }, [timer, timerFlashing, setTimer]);
 
   // Adjusted rendering logic
   return (
