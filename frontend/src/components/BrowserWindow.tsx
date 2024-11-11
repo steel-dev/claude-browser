@@ -84,67 +84,6 @@ const BrowserWindow: React.FC = () => {
     }
   }, [isRestartingSession]);
 
-  // useEffect(() => {
-  // if (frame) {
-  //   console.log(
-  //     `Current time: ${Date.now()}, frame time: ${
-  //       frame.timestamp
-  //     }, Difference: ${Date.now() - frame.timestamp}, type: ${
-  //       frame.type
-  //     }, player time: ${playerRef.current?.getReplayer().getCurrentTime()},
-  //     difference: ${
-  //       (playerRef.current?.getReplayer().getCurrentTime() || 0) -
-  //       frame.timestamp
-  //     }`
-  //   );
-  //   if (frame.type === 4) {
-  //     console.log("frame", frame);
-  //     setUrl(frame.data.href);
-  //   }
-  //   if (playerCreatedRef.current) {
-  //     playerRef.current?.addEvent(frame);
-  //   } else {
-  //     setEvents((prev) => [...prev, frame]);
-  //   }
-  // }
-
-  // if (frame) {
-  //   const img = new Image();
-  //   img.src = `data:image/jpeg;base64,${frame.data}`;
-  //   setLatestImage(img);
-  // }
-  // }, [frame]);
-
-  useEffect(() => {
-    // if (
-    //   events.length > 0 &&
-    //   !playerCreatedRef.current &&
-    //   containerRef.current
-    // ) {
-    //   playerRef.current = new rrwebPlayer({
-    //     target: containerRef.current,
-    //     props: {
-    //       events,
-    //       skipInactive: true,
-    //       liveMode: true,
-    //       width: parentRef.current?.clientWidth,
-    //       height: parentRef.current?.clientHeight,
-    //       mouseTail: false,
-    //       showController: false,
-    //     },
-    //   });
-    //   const BUFFER_MS = 350;
-    //   playerRef.current.getReplayer().play(Date.now() - BUFFER_MS);
-    //   playerCreatedRef.current = true;
-    // }
-    // return () => {
-    //   if (playerRef.current) {
-    //     playerRef.current = null;
-    //     playerCreatedRef.current = false;
-    //   }
-    // };
-  }, [events]);
-
   return (
     <Window
       title={`Steel Browser - Session ID: ${currentSession?.id}`}

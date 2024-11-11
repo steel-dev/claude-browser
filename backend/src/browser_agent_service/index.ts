@@ -119,23 +119,6 @@ export async function run(
 
     let messages = input.messages;
 
-    // Start new session
-    // const session = await steel.sessions.create({
-    //   sessionTimeout: 90000,
-    //   solveCaptcha: true,
-    // });
-
-    // Open the browser
-    // const openBrowser = () => {
-    //   exec(`open ${session.sessionViewerUrl}`, (error) => {
-    //     if (error) {
-    //       console.error('Error opening browser:', error);
-    //     }
-    //   });
-    // };
-
-    // openBrowser();
-
     console.log("CONNECTING TO BROWSER");
     const browser = await puppeteer.connect({
       browserWSEndpoint: `${env.WEBSOCKET_URL}?apiKey=${env.STEEL_API_KEY}&sessionId=${input.id}`,
@@ -193,15 +176,6 @@ export async function run(
       let currentContentBlock: any = null;
       let currentContentIndex: number = -1;
 
-      // Call the API
-      // console.log("MAKING MODEL CALL", JSON.stringify(messages, null, 2));
-      // for (const message of filteredMessages) {
-      //   console.log("MESSAGE ROLE", message.role);
-      //   console.log("MESSAGE CONTENT LENGTH", message.content.length);
-      //   for (const content of message.content) {
-      //     console.log("CONTENT TYPE", content.type);
-      //   }
-      // }
       let response: any;
       try {
         response = await anthropic.beta.messages.create({
@@ -283,12 +257,6 @@ export async function run(
         }
         // Handle other event types if necessary
       }
-
-      // At this point, we've received the full assistant message
-      // console.log(
-      //   "Assistant Message:",
-      //   JSON.stringify(assistantMessage, null, 2)
-      // );
 
       // Append assistant's response to messages
       messages.push(assistantMessage);
@@ -374,19 +342,12 @@ export async function run(
         console.log("DONE WITH FUNCTION CALLS");
       } else {
         // No function calls, assistant provided a final answer
-        assistantMessage.content.forEach((block: any) => {
-          if (block.type === "text") {
-            // Optionally output the final text
-            // output(block.text);
-          }
-        });
         break; // Exit the loop
       }
     }
 
     console.log("DISCONNECTING BROWSER");
     await browser.disconnect();
-    // await releaseSession(input.id);
 
     return;
   } catch (error) {

@@ -71,7 +71,7 @@ fastify.register(async function (fastify) {
       socket: any,
       request: FastifyRequest<{ Params: { id: string } }>
     ) => {
-      const { id } = request.params; // <-- This is the correct way to get the id
+      const { id } = request.params;
       console.log(
         "WEBSOCKET URL",
         `${env.WEBSOCKET_URL}/v1/sessions/${id}/cast?apiKey=${env.STEEL_API_KEY}`

@@ -348,12 +348,6 @@ export async function claudeComputerTool({
         // Puppeteer does not support retrieving the cursor position
         throw new Error("cursor_position action is not supported in Puppeteer");
       } else {
-        // Click actions
-        // Default to clicking at the center of the viewport
-        // const viewport = page.viewport();
-        // const x = viewport ? viewport.width / 2 : 0;
-        // const y = viewport ? viewport.height / 2 : 0;
-
         let button: "left" | "right" | "middle" = "left";
         let clickOptions: {
           button?: "left" | "right" | "middle";
