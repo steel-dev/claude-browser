@@ -1,6 +1,6 @@
 # claude-browser
 
-OS repo for claude-browser.steel.dev! Code is demo code so a bit all over the place but will be cleaning it up more over the next few weeks with a v2 release.
+OS repo for [claude-browser.steel.dev](https://claude-browser.steel.dev)! Code is demo code so a bit all over the place but will be cleaning it up more over the next few weeks with a v2 release.
 
 If you have any Qs, we're happy to help here: https://discord.gg/gPpvhNvc5R
 
